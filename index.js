@@ -57,7 +57,6 @@ const bot = mineflayer.createBot({
 });
 
 bot.loadPlugin(pathfinder);
-bot.pathfinder.dontCreateFlow = false;
 
 function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -89,6 +88,8 @@ async function boredGesture() {
 }
  
 bot.once('spawn', async () => {
+
+  bot.pathfinder.dontCreateFlow = false; // Let the bot destroy blocks touching water to get to places.
     
   const rootLayer = actions.createMineActionState(bot, "diamond_ore", 10);
 
@@ -97,8 +98,6 @@ bot.once('spawn', async () => {
 
   const webserver = new StateMachineWebserver(bot, stateMachine, WEBVIEWER_PORT);
   webserver.startServer();
-
-  b
   
 });
 
