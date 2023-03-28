@@ -48,6 +48,7 @@ const bot = mineflayer.createBot({
   host: MINECRAFT_IP, // minecraft server ip
   username: 'Jarvis', // minecraft username
   port: MINECRAFT_PORT,
+  gamemode : 0
 });
 
 bot.loadPlugin(pathfinder);
@@ -85,9 +86,11 @@ const data = {
   action: actionTokens.FOLLOW_PLAYER,
   params: { // Even things that are not being used must be initialized.
     followRadius: 5,
-    blockName: "diamond_ore",
+    blockName: "emerald_ore",
     quantity: 0,
-  }
+
+  },
+  stack: [actionTokens.FOLLOW_PLAYER]
 }
  
 bot.once('spawn', async () => {
@@ -119,8 +122,9 @@ bot.on('chat', async (username, message) => {
     data.action = actionTokens.IDLE;
     await wait(100);
     data.params.blockName = "diamond_ore";
-    data.params.quantity = 5;
+    data.params.quantity = 2;
     data.action = actionTokens.MINE;
+    data.stack.push(actionTokens.MINE)
     
     return;
   }

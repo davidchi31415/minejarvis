@@ -72,7 +72,11 @@ function createMineActionState(bot, data) {
                 parent: mineBlockState,
                 child: exit,
                 shouldTransition: () => {
-                    if (quantity <= 0 && mineBlockState.isFinished) {
+                    if (data.params.quantity <= 1 && mineBlockState.isFinished) {
+                        data.stack.pop()
+                        data.action = data.stack[data.stack.length-1]
+                        console.log("FINISHED")
+                        
                         return true;
                     }
                     return false;
@@ -84,10 +88,9 @@ function createMineActionState(bot, data) {
                 parent: mineBlockState,
                 child: findBlockState,
                 shouldTransition: () => {
-                    if (quantity > 0 && mineBlockState.isFinished) {
-                        quantity -= 1;
-                        console.log(quantity);
-                        mineBlockState.isFinished = false;
+                    if (data.params.quantity > 1 && mineBlockState.isFinished) {
+                        data.params.quantity -= 1;
+                        console.log(data.params.quantity);
                         return true;
                     }
                     return false;
