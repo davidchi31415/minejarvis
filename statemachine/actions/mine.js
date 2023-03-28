@@ -1,14 +1,22 @@
-import mineflayer from 'mineflayer';
 import { 
     StateTransition, NestedStateMachine,
     BehaviorIdle, BehaviorMineBlock, 
     BehaviorMoveTo, BehaviorFindBlock
 } from 'mineflayer-statemachine';
-import mcData_pkg from 'minecraft-data';
+import mcDataFn from 'minecraft-data';
 
     
-function createMineActionState(bot, blockName, quantity=1) {
-    const mcData = mcData_pkg(bot.version);
+function createMineActionState(bot, data) {
+    /**
+     *  data is passed in from the bot root layer.
+     *  
+     *      * blockName
+     *      * quantity
+     */
+
+    const { blockName, quantity } = data.params;
+
+    const mcData = mcDataFn(bot.version);
 
     const targets = {};
 
@@ -18,10 +26,8 @@ function createMineActionState(bot, blockName, quantity=1) {
     // Mining behavior states
     const findBlockState = new BehaviorFindBlock(bot, targets); // Set the value of targets.position to the block found
     findBlockState.blocks = [ mcData.blocksByName[blockName].id ];
-    
-    console.log(findBlockState.blocks);
 
-    findBlockState.maxDistance = 1000;
+    findBlockState.maxDistance = 100;
     const goToBlockState = new BehaviorMoveTo(bot, targets);
     const mineBlockState = new BehaviorMineBlock(bot, targets);
     

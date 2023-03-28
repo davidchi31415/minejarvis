@@ -1,18 +1,12 @@
 import mineflayer from 'mineflayer';
 import pathfinder_plugin from 'mineflayer-pathfinder';
-const { pathfinder, Movements, goals } = pathfinder_plugin;
+const { pathfinder } = pathfinder_plugin;
 import {
-  StateTransition,
   BotStateMachine,
-  EntityFilters,
-  BehaviorFollowEntity,
-  BehaviorLookAtEntity,
-  BehaviorGetClosestEntity,
-  BehaviorIdle,
-  NestedStateMachine,
   StateMachineWebserver
 } from "mineflayer-statemachine";
-import actions from './actions/index.js';
+import createRootLayer from './statemachine/index.js';
+import actionTokens from './statemachine/mappings.js';
 import { Configuration, OpenAIApi } from 'openai';
 
 const MINECRAFT_IP = '10.254.214.217';
@@ -86,14 +80,21 @@ async function boredGesture() {
     bot.setControlState("sneak", false);
   }
 }
+
+const data = {
+  action: actionTokens.FOLLOW_PLAYER,
+  params: { // Even things that are not being used must be initialized.
+    followRadius: 5,
+    blockName: "diamond_ore",
+    quantity: 0,
+  }
+}
  
 bot.once('spawn', async () => {
 
   bot.pathfinder.dontCreateFlow = false; // Let the bot destroy blocks touching water to get to places.
     
-  const rootLayer = actions.createMineActionState(bot, "diamond_ore", 10);
-
-  // We can start our state machine simply by creating a new instance.
+  const rootLayer = createRootLayer(bot, data);
   const stateMachine = new BotStateMachine(bot, rootLayer);
 
   const webserver = new StateMachineWebserver(bot, stateMachine, WEBVIEWER_PORT);
@@ -101,12 +102,38 @@ bot.once('spawn', async () => {
   
 });
 
+// bot.on('chat', async (username, message) => {
+//   if (username === bot.username) return;
+//   const response = await query(message);
+//   console.log(response);
+//   bot.chat(response);
+//   await boredGesture();
+// 2});
+
 bot.on('chat', async (username, message) => {
   if (username === bot.username) return;
-  const response = await query(message);
-  console.log(response);
-  bot.chat(response);
-  await boredGesture();
+
+  if (message === '[MINE]') {
+    console.log("Attempting to Switch to Mine.");
+
+    data.action = actionTokens.IDLE;
+    await wait(100);
+    data.params.blockName = "diamond_ore";
+    data.params.quantity = 5;
+    data.action = actionTokens.MINE;
+    
+    return;
+  }
+  if (message === '[FOLLOW]') {
+    console.log("Attempting to Switch to Follow.");
+    
+    data.action = actionTokens.IDLE;
+    await wait(100);
+    data.params.followRadius = 5;
+    data.action = actionTokens.FOLLOW_PLAYER;
+
+    return;
+  }
 });
 
 // Log errors and kick reasons:

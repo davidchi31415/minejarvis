@@ -1,18 +1,20 @@
-import mineflayer from 'mineflayer';
 import { 
     StateTransition, NestedStateMachine,
-    BehaviorIdle,
-    BehaviorMineBlock, BehaviorMoveTo,
-    BehaviorFindBlock, BehaviorFindInteractPosition
+    BehaviorIdle,BehaviorGetClosestEntity,
+    BehaviorFollowEntity, BehaviorLookAtEntity,
+    EntityFilters
 } from 'mineflayer-statemachine';
-import mcData_pkg from 'minecraft-data';
 
     
-function createMineActionState(bot) {
-    const targets = {};
-    const mcData = mcData_pkg(bot.version);
+function createFollowPlayerActionState(bot, data) {
+    /**
+     *  data is passed in by the bot root layer.
+     *      * followRadius
+     */
 
-    const followRadius = 5;
+    const { followRadius } = data.params;
+
+    const targets = {};
 
     // Enter and Exit
     const exit = new BehaviorIdle(); // Create our states
@@ -44,12 +46,12 @@ function createMineActionState(bot) {
         new StateTransition({
             parent: lookAtPlayerState,
             child: followPlayerState,
-            shouldTransition: () => lookAtPlayer.distanceToTarget() >= followRadius,
+            shouldTransition: () => lookAtPlayerState.distanceToTarget() >= followRadius,
         }),
     ];
 
-    return new NestedStateMachine(transitions, followPlayerState, exit);
+    return new NestedStateMachine(transitions, getClosestPlayerState, exit);
 }
 
 
-export default createMineActionState;
+export default createFollowPlayerActionState;
