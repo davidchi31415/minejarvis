@@ -11,7 +11,7 @@ import { Configuration, OpenAIApi } from 'openai';
 
 const MINECRAFT_IP = '10.254.214.217';
 const MINECRAFT_PORT = 25565;
-const WEBVIEWER_PORT = 3000;
+const WEBVIEWER_PORT = 3001;
 const API_KEY = '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';
 
 const configuration = new Configuration({

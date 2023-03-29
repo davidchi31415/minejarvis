@@ -5,7 +5,17 @@ import {
 } from 'mineflayer-statemachine';
 import mcDataFn from 'minecraft-data';
 
-    
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function leaveAction(data) {
+    await wait(1000)
+    data.stack.pop()
+    data.action = data.stack[data.stack.length-1]
+    console.log("FINISHED")
+}
+  
 function createMineActionState(bot, data) {
     /**
      *  data is passed in from the bot root layer.
@@ -30,8 +40,7 @@ function createMineActionState(bot, data) {
     findBlockState.maxDistance = 100;
     const goToBlockState = new BehaviorMoveTo(bot, targets);
     const mineBlockState = new BehaviorMineBlock(bot, targets);
-    
-    
+
     const transitions = [
         new StateTransition( // Attempt to find the nearest block
             {
@@ -49,6 +58,7 @@ function createMineActionState(bot, data) {
                 child: exit,
                 shouldTransition: () => {
                     console.log(`[Mine Action] Error: Could not find ${blockName} block`);
+                    leaveAction(data)
                     return true;
                 },
             }
@@ -73,10 +83,7 @@ function createMineActionState(bot, data) {
                 child: exit,
                 shouldTransition: () => {
                     if (data.params.quantity <= 1 && mineBlockState.isFinished) {
-                        data.stack.pop()
-                        data.action = data.stack[data.stack.length-1]
-                        console.log("FINISHED")
-                        
+                        leaveAction(data)
                         return true;
                     }
                     return false;
@@ -89,9 +96,12 @@ function createMineActionState(bot, data) {
                 child: findBlockState,
                 shouldTransition: () => {
                     if (data.params.quantity > 1 && mineBlockState.isFinished) {
-                        data.params.quantity -= 1;
-                        console.log(data.params.quantity);
-                        return true;
+                        setTimeout(() => {  
+                            data.params.quantity -= 1;
+                            console.log(data.params.quantity); 
+                            return true; 
+                        }, 1000);
+                        return true
                     }
                     return false;
                 },
