@@ -132,7 +132,7 @@ bot.on("chat", async (username, message) => {
 
 		return;
 	}
-	if (message === "[FOLLOW]") {
+	if (message.split(" ")[0] === "[FOLLOW]") {
 		console.log("Attempting to Switch to Follow.");
 
 		data.action = actionTokens.IDLE;

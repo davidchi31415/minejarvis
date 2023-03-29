@@ -38,27 +38,35 @@ function createMineActionState(bot, data) {
 
 	// Mining behavior states
 	const findBlockState = new BehaviorFindBlock(bot, targets); // Set the value of targets.position to the block found
+	findBlockState.blocks = [mcData.blocksByName[blockName].id];
 
+	findBlockState.maxDistance = 100;
 	const goToBlockState = new BehaviorMoveTo(bot, targets);
 	const mineBlockState = new BehaviorMineBlock(bot, targets);
+	const setBlockState = new BehaviorIdle();
 
 	const transitions = [
-		new StateTransition({
-			// Attempt to find the nearest block
-			parent: findBlockState,
-			child: goToBlockState,
+		new StateTransition({ // Attempt to find the nearest block
+			parent: setBlockState,
+			child: findBlockState,
 			shouldTransition: () => {
 				findBlockState.blocks = [
 					mcData.blocksByName[data.params.blockName].id,
 				];
 				findBlockState.maxDistance = 100;
+				return true;
+			},
+		}),
+		new StateTransition({ // Attempt to find the nearest block
+			parent: findBlockState,
+			child: goToBlockState,
+			shouldTransition: () => {
 				if (targets.position !== null && targets.position !== undefined)
 					return true;
 				return false;
 			},
 		}),
-		new StateTransition({
-			// If block of certain type isn't found then leave
+		new StateTransition({ // If block of certain type isn't found then leave
 			parent: findBlockState,
 			child: exit,
 			shouldTransition: () => {
@@ -94,7 +102,7 @@ function createMineActionState(bot, data) {
 		}),
 		new StateTransition({
 			parent: mineBlockState,
-			child: findBlockState,
+			child: setBlockState,
 			shouldTransition: () => {
 				if (data.params.quantity > 1 && mineBlockState.isFinished) {
 					setTimeout(() => {
@@ -109,7 +117,7 @@ function createMineActionState(bot, data) {
 		}),
 	];
 
-	return new NestedStateMachine(transitions, findBlockState, exit);
+	return new NestedStateMachine(transitions, setBlockState, exit);
 }
 
 export default createMineActionState;
