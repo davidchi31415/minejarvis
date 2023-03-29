@@ -23,6 +23,7 @@ function createRootLayer(bot, data) {
 
     const followActionState = actionStates.createFollowPlayerActionState(bot, data);
     const mineActionState = actionStates.createMineActionState(bot, data);
+    const fightActionState = actionStates.createFightActionState(bot, data);
     
     const idleToActionTransitions = [
         new StateTransition({
@@ -34,6 +35,11 @@ function createRootLayer(bot, data) {
             parent: idleActionState,
             child: mineActionState,
             shouldTransition: () => data.action === actionTokens.MINE
+        }),
+        new StateTransition({
+            parent: idleActionState,
+            child: fightActionState,
+            shouldTransition: () => data.action === actionTokens.FIGHT
         }),
     ];
 
@@ -47,6 +53,11 @@ function createRootLayer(bot, data) {
             parent: mineActionState,
             child: idleActionState,
             shouldTransition: () => data.action !== actionTokens.MINE
+        }),
+        new StateTransition({
+            parent: fightActionState,
+            child: idleActionState,
+            shouldTransition: () => data.action !== actionTokens.FIGHT
         }),
     ];
 

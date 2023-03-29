@@ -1,8 +1,9 @@
 import { 
     StateTransition, NestedStateMachine,
-    BehaviorIdle, BehaviorMineBlock, 
-    BehaviorMoveTo, BehaviorFindBlock
+    BehaviorIdle, BehaviorMoveTo, 
 } from 'mineflayer-statemachine';
+import {BehaviorFightMob, BehaviorGetClosestMob} from '../behaviors/index.ts';
+
 import mcDataFn from 'minecraft-data';
 
 function wait(ms) {
@@ -16,7 +17,7 @@ async function leaveAction(data) {
     console.log("FINISHED")
 }
   
-function createMineActionState(bot, data) {
+function createFightActionState(bot, data) {
     /**
      *  data is passed in from the bot root layer.
      *  
@@ -24,7 +25,7 @@ function createMineActionState(bot, data) {
      *      * quantity
      */
 
-    const { blockName, quantity } = data.params;
+    const { mobName, quantity } = data.params;
 
     const mcData = mcDataFn(bot.version);
 
@@ -33,43 +34,30 @@ function createMineActionState(bot, data) {
     // Enter and Exit
     const exit = new BehaviorIdle();
 
-    // Mining behavior states
-    const findBlockState = new BehaviorFindBlock(bot, targets); // Set the value of targets.position to the block found
-    findBlockState.blocks = [ mcData.blocksByName[blockName].id ];
-
-    findBlockState.maxDistance = 100;
-    const goToBlockState = new BehaviorMoveTo(bot, targets);
-    const mineBlockState = new BehaviorMineBlock(bot, targets);
-    const setBlockState = new BehaviorIdle();
-
+    // Fighting behavior states
+    const findNearestMobState = new BehaviorGetClosestMob(bot, targets)
+    const goToMobState = new BehaviorMoveTo(bot, targets)
+    const fightMobState = new BehaviorFightMob(bot, targets)
     const transitions = [
         new StateTransition( // Attempt to find the nearest block
             {
-                parent: setBlockState,
-                child: findBlockState,
+                parent: findNearestMobState,
+                child: goToMobState,
                 shouldTransition: () => {
-                    findBlockState.blocks = [ mcData.blocksByName[data.params.blockName].id ];
-                    findBlockState.maxDistance = 100;
-                    return true;
-                },
-            }
-        ),
-        new StateTransition( // Attempt to find the nearest block
-            {
-                parent: findBlockState,
-                child: goToBlockState,
-                shouldTransition: () => {
-                    if (targets.position !== null && targets.position !== undefined) return true;
+                    if (targets.entity !== null && targets.entity !== undefined) {
+                        console.log("FOUND MOB");
+                        return true;
+                    }
                     return false;
                 },
             }
         ),
         new StateTransition( // If block of certain type isn't found then leave 
             {
-                parent: findBlockState,
+                parent: findNearestMobState,
                 child: exit,
                 shouldTransition: () => {
-                    console.log(`[Mine Action] Error: Could not find ${blockName} block`);
+                    console.log(`[Fight Action] Error: Could not find ${mobName} mob`);
                     leaveAction(data)
                     return true;
                 },
@@ -78,10 +66,11 @@ function createMineActionState(bot, data) {
         
         new StateTransition(
             {
-                parent: goToBlockState,
-                child: mineBlockState,
+                parent: goToMobState,
+                child: fightMobState,
                 shouldTransition: () => {;
-                    if (goToBlockState.distanceToTarget() <= 1) {
+                    if (goToMobState.distanceToTarget() <= 2) {
+                        console.log("TRANSITIONING TO FIGHTING")
                         return true;
                     }
                     return false;
@@ -91,10 +80,11 @@ function createMineActionState(bot, data) {
 
         new StateTransition(
             {
-                parent: mineBlockState,
+                parent: fightMobState,
                 child: exit,
                 shouldTransition: () => {
-                    if (data.params.quantity <= 1 && mineBlockState.isFinished) {
+                    if (data.params.quantity <= 1 && fightMobState.isFinished) {
+                        console.log("finished fighting")
                         leaveAction(data)
                         return true;
                     }
@@ -104,10 +94,11 @@ function createMineActionState(bot, data) {
         ),
         new StateTransition(
             {
-                parent: mineBlockState,
-                child: setBlockState,
+                parent: fightMobState,
+                child: findNearestMobState,
                 shouldTransition: () => {
-                    if (data.params.quantity > 1 && mineBlockState.isFinished) {
+                    if (data.params.quantity > 1 && fightMobState.isFinished) {
+                        console.log("finished fighting")
                         setTimeout(() => {  
                             data.params.quantity -= 1;
                             console.log(data.params.quantity); 
@@ -121,8 +112,8 @@ function createMineActionState(bot, data) {
         ),
     ];
 
-    return new NestedStateMachine(transitions, setBlockState, exit);
+    return new NestedStateMachine(transitions, findBlockState, exit);
 }
 
 
-export default createMineActionState;
+export default createFightActionState;

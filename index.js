@@ -1,6 +1,8 @@
 import mineflayer from 'mineflayer';
 import pathfinder_plugin from 'mineflayer-pathfinder';
 const { pathfinder } = pathfinder_plugin;
+import { plugin as pvp } from 'mineflayer-pvp';
+
 import {
   BotStateMachine,
   StateMachineWebserver
@@ -52,6 +54,7 @@ const bot = mineflayer.createBot({
 });
 
 bot.loadPlugin(pathfinder);
+bot.loadPlugin(pvp)
 
 function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -88,7 +91,7 @@ const data = {
     followRadius: 5,
     blockName: "emerald_ore",
     quantity: 0,
-
+    mobName: "Zombie"
   },
   stack: [actionTokens.FOLLOW_PLAYER]
 }
@@ -135,6 +138,17 @@ bot.on('chat', async (username, message) => {
     await wait(100);
     data.params.followRadius = 5;
     data.action = actionTokens.FOLLOW_PLAYER;
+
+    return;
+  }
+  if (message === '[FIGHT]') {
+    console.log("Attempting to Switch to Fight.");
+    
+    data.action = actionTokens.IDLE;
+    await wait(100);
+    data.params.quantity = 2;
+    data.params.mobName = 'Zombie';
+    data.action = actionTokens.FIGHT;
 
     return;
   }
