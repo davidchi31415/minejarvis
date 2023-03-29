@@ -1,59 +1,50 @@
-import { 
-    StateTransition, NestedStateMachine,
-    BehaviorIdle, BehaviorMineBlock, 
-    BehaviorMoveTo, BehaviorFindBlock
-} from 'mineflayer-statemachine';
-import mcDataFn from 'minecraft-data';
+import {
+	StateTransition,
+	NestedStateMachine,
+	BehaviorIdle,
+	BehaviorMineBlock,
+	BehaviorMoveTo,
+	BehaviorFindBlock,
+} from "mineflayer-statemachine";
+import mcDataFn from "minecraft-data";
 
 function wait(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function leaveAction(data) {
-    await wait(1000)
-    data.stack.pop()
-    data.action = data.stack[data.stack.length-1]
-    console.log("FINISHED")
+	await wait(1000);
+	data.stack.pop();
+	data.action = data.stack[data.stack.length - 1];
+	console.log("FINISHED");
 }
-  
+
 function createMineActionState(bot, data) {
-    /**
-     *  data is passed in from the bot root layer.
-     *  
-     *      * blockName
-     *      * quantity
-     */
+	/**
+	 *  data is passed in from the bot root layer.
+	 *
+	 *      * blockName
+	 *      * quantity
+	 */
 
-    const { blockName, quantity } = data.params;
+	const { blockName, quantity } = data.params;
 
-    const mcData = mcDataFn(bot.version);
+	const mcData = mcDataFn(bot.version);
 
-    const targets = {};
+	const targets = {};
 
-    // Enter and Exit
-    const exit = new BehaviorIdle();
+	// Enter and Exit
+	const exit = new BehaviorIdle();
 
-    // Mining behavior states
-    const findBlockState = new BehaviorFindBlock(bot, targets); // Set the value of targets.position to the block found
-    findBlockState.blocks = [ mcData.blocksByName[blockName].id ];
+	// Mining behavior states
+	const findBlockState = new BehaviorFindBlock(bot, targets); // Set the value of targets.position to the block found
+	findBlockState.blocks = [mcData.blocksByName[blockName].id];
 
     findBlockState.maxDistance = 100;
     const goToBlockState = new BehaviorMoveTo(bot, targets);
     const mineBlockState = new BehaviorMineBlock(bot, targets);
-    const setBlockState = new BehaviorIdle();
 
     const transitions = [
-        new StateTransition( // Attempt to find the nearest block
-            {
-                parent: setBlockState,
-                child: findBlockState,
-                shouldTransition: () => {
-                    findBlockState.blocks = [ mcData.blocksByName[data.params.blockName].id ];
-                    findBlockState.maxDistance = 100;
-                    return true;
-                },
-            }
-        ),
         new StateTransition( // Attempt to find the nearest block
             {
                 parent: findBlockState,
@@ -105,7 +96,7 @@ function createMineActionState(bot, data) {
         new StateTransition(
             {
                 parent: mineBlockState,
-                child: setBlockState,
+                child: findBlockState,
                 shouldTransition: () => {
                     if (data.params.quantity > 1 && mineBlockState.isFinished) {
                         setTimeout(() => {  
@@ -121,8 +112,7 @@ function createMineActionState(bot, data) {
         ),
     ];
 
-    return new NestedStateMachine(transitions, setBlockState, exit);
+    return new NestedStateMachine(transitions, findBlockState, exit);
 }
-
 
 export default createMineActionState;
