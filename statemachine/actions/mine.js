@@ -40,8 +40,20 @@ function createMineActionState(bot, data) {
     findBlockState.maxDistance = 100;
     const goToBlockState = new BehaviorMoveTo(bot, targets);
     const mineBlockState = new BehaviorMineBlock(bot, targets);
+    const setBlockState = new BehaviorIdle();
 
     const transitions = [
+        new StateTransition( // Attempt to find the nearest block
+            {
+                parent: setBlockState,
+                child: findBlockState,
+                shouldTransition: () => {
+                    findBlockState.blocks = [ mcData.blocksByName[data.params.blockName].id ];
+                    findBlockState.maxDistance = 100;
+                    return true;
+                },
+            }
+        ),
         new StateTransition( // Attempt to find the nearest block
             {
                 parent: findBlockState,
@@ -93,7 +105,7 @@ function createMineActionState(bot, data) {
         new StateTransition(
             {
                 parent: mineBlockState,
-                child: findBlockState,
+                child: setBlockState,
                 shouldTransition: () => {
                     if (data.params.quantity > 1 && mineBlockState.isFinished) {
                         setTimeout(() => {  
