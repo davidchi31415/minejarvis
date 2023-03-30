@@ -5,8 +5,9 @@ import {
   NestedStateMachine,
   BehaviorIdle,
 } from 'mineflayer-statemachine';
+import {Bot} from 'mineflayer';
 
-function createRootLayer(bot, data) {
+function createRootLayer(bot: Bot, data: any) {
   /**
    * data is an object containing two attributes:
    *      action:

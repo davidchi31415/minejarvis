@@ -8,13 +8,12 @@ const mineflayer_pvp_1 = require("mineflayer-pvp");
  * is entered, and should transition out immediately.
  */
 class BehaviorGetClosestMob {
-    constructor(bot, targets, filter) {
+    constructor(bot, targets) {
         this.stateName = 'getClosestEntity';
         this.active = false;
         this.mobs = [];
         this.bot = bot;
         this.targets = targets;
-        this.filter = filter;
         this.bot.loadPlugin(mineflayer_pvp_1.plugin);
     }
     onStateEntered() {
@@ -31,7 +30,7 @@ class BehaviorGetClosestMob {
      */
     getClosestMob() {
         const closest = null;
-        const mobFilter = (e) => e.type === 'mob' && e.mobType === 'Zombie';
+        const mobFilter = (e) => true; // e.mobType?.toUpperCase() === 'ZOMBIE';
         const mob = this.bot.nearestEntity(mobFilter);
         return mob;
     }

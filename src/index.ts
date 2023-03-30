@@ -10,7 +10,7 @@ import {Configuration, OpenAIApi} from 'openai';
 
 const MINECRAFT_IP = '10.254.214.217';
 const MINECRAFT_PORT = 25565;
-const WEBVIEWER_PORT = 3001;
+const WEBVIEWER_PORT = 3005;
 const API_KEY = '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';
 
 const configuration = new Configuration({
@@ -18,7 +18,7 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-const messages = [
+const messages : any = [
   {
     role: 'user',
     content:
@@ -49,13 +49,12 @@ const bot = mineflayer.createBot({
   host: MINECRAFT_IP, // minecraft server ip
   username: 'Jarvis', // minecraft username
   port: MINECRAFT_PORT,
-  gamemode: 0,
 });
 
 bot.loadPlugin(pathfinder);
 bot.loadPlugin(pvp);
 
-function wait(ms: Number) {
+function wait(ms: any) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -90,13 +89,14 @@ const data = {
     // Even things that are not being used must be initialized.
     followRadius: 5,
     blockName: 'emerald_ore',
+    mobName : 'Zombie',
     quantity: 0,
   },
   stack: [actionTokens.FOLLOW_PLAYER],
 };
 
 bot.once('spawn', async () => {
-  bot.pathfinder.dontCreateFlow = false; // Let the bot destroy blocks touching water to get to places.
+  // bot.pathfinder.dontCreateFlow = false; // Let the bot destroy blocks touching water to get to places.
 
   const rootLayer = createRootLayer(bot, data);
   const stateMachine = new BotStateMachine(bot, rootLayer);
@@ -139,6 +139,17 @@ bot.on('chat', async (username: string, message: string) => {
     await wait(100);
     data.params.followRadius = 5;
     data.action = actionTokens.FOLLOW_PLAYER;
+
+    return;
+  }
+  if (message.split(' ')[0] === '[FIGHT]') {
+    console.log('Attempting to Switch to Fight.');
+
+    data.action = actionTokens.IDLE;
+    await wait(100);
+    data.params.followRadius = 5;
+    data.params.quantity = 2;
+    data.action = actionTokens.FIGHT;
 
     return;
   }

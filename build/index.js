@@ -22,7 +22,7 @@ const mappings_js_1 = __importDefault(require("./statemachine/mappings.js"));
 const openai_1 = require("openai");
 const MINECRAFT_IP = '10.254.214.217';
 const MINECRAFT_PORT = 25565;
-const WEBVIEWER_PORT = 3001;
+const WEBVIEWER_PORT = 3005;
 const API_KEY = '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';
 const configuration = new openai_1.Configuration({
     apiKey: API_KEY,
@@ -58,7 +58,6 @@ const bot = mineflayer_1.default.createBot({
     host: MINECRAFT_IP,
     username: 'Jarvis',
     port: MINECRAFT_PORT,
-    gamemode: 0,
 });
 bot.loadPlugin(pathfinder);
 bot.loadPlugin(mineflayer_pvp_1.plugin);
@@ -99,12 +98,13 @@ const data = {
         // Even things that are not being used must be initialized.
         followRadius: 5,
         blockName: 'emerald_ore',
+        mobName: 'Zombie',
         quantity: 0,
     },
     stack: [mappings_js_1.default.FOLLOW_PLAYER],
 };
 bot.once('spawn', () => __awaiter(void 0, void 0, void 0, function* () {
-    bot.pathfinder.dontCreateFlow = false; // Let the bot destroy blocks touching water to get to places.
+    // bot.pathfinder.dontCreateFlow = false; // Let the bot destroy blocks touching water to get to places.
     const rootLayer = (0, index_js_1.default)(bot, data);
     const stateMachine = new mineflayer_statemachine_1.BotStateMachine(bot, rootLayer);
     const webserver = new mineflayer_statemachine_1.StateMachineWebserver(bot, stateMachine, WEBVIEWER_PORT);
@@ -136,6 +136,15 @@ bot.on('chat', (username, message) => __awaiter(void 0, void 0, void 0, function
         yield wait(100);
         data.params.followRadius = 5;
         data.action = mappings_js_1.default.FOLLOW_PLAYER;
+        return;
+    }
+    if (message.split(' ')[0] === '[FIGHT]') {
+        console.log('Attempting to Switch to Fight.');
+        data.action = mappings_js_1.default.IDLE;
+        yield wait(100);
+        data.params.followRadius = 5;
+        data.params.quantity = 2;
+        data.action = mappings_js_1.default.FIGHT;
         return;
     }
 }));

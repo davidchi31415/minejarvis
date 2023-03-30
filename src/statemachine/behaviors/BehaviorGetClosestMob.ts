@@ -15,11 +15,6 @@ export class BehaviorGetClosestMob implements StateBehavior {
    */
   readonly targets: StateMachineTargets;
 
-  /**
-   * The filter being used to find entities with.
-   */
-  filter: (entity: Entity) => boolean;
-
   stateName = 'getClosestEntity';
   active = false;
   x?: number;
@@ -28,12 +23,10 @@ export class BehaviorGetClosestMob implements StateBehavior {
 
   constructor(
     bot: Bot,
-    targets: StateMachineTargets,
-    filter: (entity: Entity) => boolean
+    targets: StateMachineTargets
   ) {
     this.bot = bot;
     this.targets = targets;
-    this.filter = filter;
     this.bot.loadPlugin(pvpPlugin);
   }
 
@@ -51,9 +44,8 @@ export class BehaviorGetClosestMob implements StateBehavior {
    */
   private getClosestMob(): Entity | null {
     const closest: Entity | null = null;
-    const mobFilter = (e: Entity) => e.type === 'mob' && e.mobType === 'Zombie';
+    const mobFilter = (e: Entity) => true; // e.mobType?.toUpperCase() === 'ZOMBIE';
     const mob = this.bot.nearestEntity(mobFilter);
-
     return mob;
   }
 }

@@ -39,11 +39,21 @@ function createMineActionState(bot, data) {
     const exit = new mineflayer_statemachine_1.BehaviorIdle();
     // Mining behavior states
     const findBlockState = new mineflayer_statemachine_1.BehaviorFindBlock(bot, targets); // Set the value of targets.position to the block found
-    findBlockState.blocks = [mcData.blocksByName[blockName].id];
-    findBlockState.maxDistance = 100;
     const goToBlockState = new mineflayer_statemachine_1.BehaviorMoveTo(bot, targets);
     const mineBlockState = new mineflayer_statemachine_1.BehaviorMineBlock(bot, targets);
+    const setBlockState = new mineflayer_statemachine_1.BehaviorIdle();
     const transitions = [
+        new mineflayer_statemachine_1.StateTransition({
+            parent: setBlockState,
+            child: findBlockState,
+            shouldTransition: () => {
+                findBlockState.blocks = [
+                    mcData.blocksByName[data.params.blockName].id,
+                ];
+                findBlockState.maxDistance = 100;
+                return true;
+            },
+        }),
         new mineflayer_statemachine_1.StateTransition({
             // Attempt to find the nearest block
             parent: findBlockState,
@@ -101,6 +111,6 @@ function createMineActionState(bot, data) {
             },
         }),
     ];
-    return new mineflayer_statemachine_1.NestedStateMachine(transitions, findBlockState, exit);
+    return new mineflayer_statemachine_1.NestedStateMachine(transitions, setBlockState, exit);
 }
 exports.default = createMineActionState;

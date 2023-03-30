@@ -4,22 +4,22 @@ import {
   BehaviorIdle,
   BehaviorMoveTo,
 } from 'mineflayer-statemachine';
-import {BehaviorFightMob, BehaviorGetClosestMob} from '../behaviors/index';
+import {BehaviorGetClosestMob} from '../behaviors/BehaviorGetClosestMob';
+import {BehaviorFightMob} from '../behaviors/BehaviorFightMob';
+import {Bot} from 'mineflayer';
 
-import mcDataFn from 'minecraft-data';
-
-function wait(ms) {
+function wait(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function leaveAction(data) {
+async function leaveAction(data: any) {
   await wait(1000);
   data.stack.pop();
   data.action = data.stack[data.stack.length - 1];
   console.log('FINISHED');
 }
 
-function createFightActionState(bot, data) {
+function createFightActionState(bot: Bot, data: any) {
   /**
    *  data is passed in from the bot root layer.
    *
@@ -29,9 +29,7 @@ function createFightActionState(bot, data) {
 
   const {mobName, quantity} = data.params;
 
-  const mcData = mcDataFn(bot.version);
-
-  const targets = {};
+  const targets: any = {};
 
   // Enter and Exit
   const exit = new BehaviorIdle();
@@ -46,7 +44,7 @@ function createFightActionState(bot, data) {
       parent: findNearestMobState,
       child: goToMobState,
       shouldTransition: () => {
-        if (targets.entity !== null && targets.entity !== undefined) {
+        if (targets.entity) {
           console.log('FOUND MOB');
           return true;
         }
@@ -96,7 +94,6 @@ function createFightActionState(bot, data) {
           console.log('finished fighting');
           setTimeout(() => {
             data.params.quantity -= 1;
-            console.log(data.params.quantity);
             return true;
           }, 1000);
           return true;
@@ -106,7 +103,7 @@ function createFightActionState(bot, data) {
     }),
   ];
 
-  return new NestedStateMachine(transitions, findBlockState, exit);
+  return new NestedStateMachine(transitions, findNearestMobState, exit);
 }
 
 export default createFightActionState;

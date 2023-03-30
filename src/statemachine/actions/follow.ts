@@ -8,7 +8,7 @@ import {
   EntityFilters,
 } from 'mineflayer-statemachine';
 
-function createFollowPlayerActionState(bot, data) {
+function createFollowPlayerActionState(bot : any, data : any) {
   /**
    *  data is passed in by the bot root layer.
    *      * followRadius

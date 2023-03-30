@@ -8,13 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const mineflayer_statemachine_1 = require("mineflayer-statemachine");
-const index_1 = require("../behaviors/index");
-const minecraft_data_1 = __importDefault(require("minecraft-data"));
+const BehaviorGetClosestMob_1 = require("../behaviors/BehaviorGetClosestMob");
+const BehaviorFightMob_1 = require("../behaviors/BehaviorFightMob");
 function wait(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -34,21 +31,20 @@ function createFightActionState(bot, data) {
      *      * quantity
      */
     const { mobName, quantity } = data.params;
-    const mcData = (0, minecraft_data_1.default)(bot.version);
     const targets = {};
     // Enter and Exit
     const exit = new mineflayer_statemachine_1.BehaviorIdle();
     // Fighting behavior states
-    const findNearestMobState = new index_1.BehaviorGetClosestMob(bot, targets);
+    const findNearestMobState = new BehaviorGetClosestMob_1.BehaviorGetClosestMob(bot, targets);
     const goToMobState = new mineflayer_statemachine_1.BehaviorMoveTo(bot, targets);
-    const fightMobState = new index_1.BehaviorFightMob(bot, targets);
+    const fightMobState = new BehaviorFightMob_1.BehaviorFightMob(bot, targets);
     const transitions = [
         new mineflayer_statemachine_1.StateTransition({
             // Attempt to find the nearest block
             parent: findNearestMobState,
             child: goToMobState,
             shouldTransition: () => {
-                if (targets.entity !== null && targets.entity !== undefined) {
+                if (targets.entity) {
                     console.log('FOUND MOB');
                     return true;
                 }
@@ -96,7 +92,6 @@ function createFightActionState(bot, data) {
                     console.log('finished fighting');
                     setTimeout(() => {
                         data.params.quantity -= 1;
-                        console.log(data.params.quantity);
                         return true;
                     }, 1000);
                     return true;
@@ -105,6 +100,6 @@ function createFightActionState(bot, data) {
             },
         }),
     ];
-    return new mineflayer_statemachine_1.NestedStateMachine(transitions, findBlockState, exit);
+    return new mineflayer_statemachine_1.NestedStateMachine(transitions, findNearestMobState, exit);
 }
 exports.default = createFightActionState;
