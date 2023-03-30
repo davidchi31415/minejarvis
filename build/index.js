@@ -142,6 +142,7 @@ bot.on('chat', (username, message) => __awaiter(void 0, void 0, void 0, function
         console.log('Attempting to Switch to Fight.');
         data.action = mappings_js_1.default.IDLE;
         yield wait(100);
+        data.params.mobName = message.split(' ')[1];
         data.params.followRadius = 5;
         data.params.quantity = 2;
         data.action = mappings_js_1.default.FIGHT;

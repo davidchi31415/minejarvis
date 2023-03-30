@@ -29,7 +29,6 @@ class BehaviorGetClosestMob {
      * @returns The closest entity, or null if there are none.
      */
     getClosestMob() {
-        const closest = null;
         const mobFilter = (e) => true; // e.mobType?.toUpperCase() === 'ZOMBIE';
         const mob = this.bot.nearestEntity(mobFilter);
         return mob;
