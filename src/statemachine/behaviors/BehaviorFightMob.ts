@@ -1,14 +1,10 @@
 import {StateBehavior, StateMachineTargets} from 'mineflayer-statemachine';
-const pvp = require('mineflayer-pvp').plugin;
 import {Bot} from 'mineflayer';
-import {Item} from 'prismarine-item';
-import {Block} from 'prismarine-block';
-import {Entity} from 'prismarine-entity';
 
 
 /**
- * This behavior will attempt to break the target block. If the target block
- * could not be mined for any reason, this behavior fails silently.
+ * This behavior will attempt to fight a mob. If the bot has
+ * a sword and/or a shield, it will equip them.
  */
 export class BehaviorFightMob implements StateBehavior {
   readonly bot: Bot;
@@ -46,46 +42,24 @@ export class BehaviorFightMob implements StateBehavior {
     const sword = this.bot.inventory
       .items()
       .find(item => item.name.includes('sword'));
-    const shield = this.bot.inventory
-      .items()
-      .find(item => item.name.includes('shield'));
-    if (sword !== null) {
+    if (sword) {
       this.bot.equip(sword, 'hand');
     }
 
-    if (shield !== null) {
+    const shield = this.bot.inventory
+      .items()
+      .find(item => item.name.includes('shield'));
+    if (shield) {
       setTimeout(() => {
         this.bot.equip(shield, 'off-hand');
       }, 100);
     }
 
-    if (this.targets.entity !== null && this.targets.entity !== undefined) {
+    if (this.targets.entity) {
       this.bot.pvp.attack(this.targets.entity);
     } else {
       console.log('NO MOB FOUND!');
     }
     this.isFinished = true;
-  }
-
-  private getBestTool(block: Block): Item | undefined {
-    const items = this.bot.inventory.items();
-    for (const i in block.harvestTools) {
-      const id = parseInt(i, 10);
-      for (const item of items) {
-        if (item.type === id) {
-          // Ready select
-          if (
-            this.bot.heldItem !== null &&
-            this.bot.heldItem.type === item.type
-          ) {
-            return undefined;
-          }
-
-          return item;
-        }
-      }
-    }
-
-    return undefined;
   }
 }

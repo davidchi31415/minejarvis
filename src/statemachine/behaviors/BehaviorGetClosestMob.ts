@@ -10,9 +10,6 @@ import {plugin as pvpPlugin} from 'mineflayer-pvp';
  * is entered, and should transition out immediately.
  */
 export class BehaviorGetClosestMob implements StateBehavior {
-  /**
-   * The bot this behavior is acting on.
-   */
   readonly bot: Bot;
 
   /**
@@ -44,7 +41,7 @@ export class BehaviorGetClosestMob implements StateBehavior {
 
   onStateEntered(): void {
     this.targets.entity = this.getClosestMob() ?? undefined;
-    if (this.targets.entity !== null) {
+    if (this.targets.entity) {
       this.targets.position = this.targets.entity.position;
     }
   }
@@ -55,9 +52,8 @@ export class BehaviorGetClosestMob implements StateBehavior {
    * @returns The closest entity, or null if there are none.
    */
   private getClosestMob(): Entity | null {
-    const closest = null;
-    const distance = 0;
-    const mobFilter = e => e.type === 'mob' && e.mobType === 'Zombie';
+    const closest: Entity | null = null;
+    const mobFilter = (e: Entity) => e.type === 'mob' && e.mobType === 'Zombie';
     const mob = this.bot.nearestEntity(mobFilter);
 
     return mob;
