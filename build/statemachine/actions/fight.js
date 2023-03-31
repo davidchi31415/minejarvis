@@ -27,7 +27,7 @@ function createFightActionState(bot, data) {
     /**
      *  data is passed in from the bot root layer.
      *
-     *      * blockName
+     *      * mobName
      *      * quantity
      */
     const targets = {};
@@ -36,7 +36,6 @@ function createFightActionState(bot, data) {
     // Fighting behavior states
     const setMobState = new mineflayer_statemachine_1.BehaviorIdle();
     const findNearestMobState = new BehaviorGetClosestMob_1.BehaviorGetClosestMob(bot, targets);
-    const goToMobState = new mineflayer_statemachine_1.BehaviorMoveTo(bot, targets);
     const fightMobState = new BehaviorFightMob_1.BehaviorFightMob(bot, targets);
     const transitions = [
         new mineflayer_statemachine_1.StateTransition({
@@ -63,12 +62,9 @@ function createFightActionState(bot, data) {
             parent: findNearestMobState,
             child: exit,
             shouldTransition: () => {
-                if (!targets.entity) {
-                    console.log(`[Fight Action] Error: Could not find ${data.params.mobName} mob in radius of ${data.params.fightRadius} blocks`);
-                    leaveAction(data);
-                    return true;
-                }
-                return false;
+                console.log(`[Fight Action] Error: Could not find ${data.params.mobName} mob in radius of ${data.params.fightRadius} blocks`);
+                leaveAction(data);
+                return true;
             },
         }),
         new mineflayer_statemachine_1.StateTransition({
@@ -88,6 +84,7 @@ function createFightActionState(bot, data) {
             child: findNearestMobState,
             shouldTransition: () => {
                 if (data.params.quantity > 1 && fightMobState.isFinished) {
+                    targets.entity = null;
                     console.log('finished fighting');
                     data.params.quantity -= 1;
                     return true;

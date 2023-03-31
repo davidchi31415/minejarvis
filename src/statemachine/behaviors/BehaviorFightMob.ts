@@ -10,7 +10,7 @@ export class BehaviorFightMob implements StateBehavior {
   readonly bot: Bot;
   readonly targets: StateMachineTargets;
 
-  stateName = 'mineBlock';
+  stateName = 'fightMob';
   active = false;
   x?: number;
   y?: number;
@@ -34,7 +34,7 @@ export class BehaviorFightMob implements StateBehavior {
   onStateEntered(): void {
     this.isFinished = false;
 
-    if (this.targets.position === null) {
+    if (this.targets.entity === null) {
       this.isFinished = true;
       return;
     }

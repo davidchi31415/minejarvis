@@ -13,7 +13,7 @@ class BehaviorFightMob {
      * @param targets - The bot targets objects.
      */
     constructor(bot, targets) {
-        this.stateName = 'mineBlock';
+        this.stateName = 'fightMob';
         this.active = false;
         /**
          * Checks if the bot has finished mining the block or not.
@@ -24,7 +24,7 @@ class BehaviorFightMob {
     }
     onStateEntered() {
         this.isFinished = false;
-        if (this.targets.position === null) {
+        if (this.targets.entity === null) {
             this.isFinished = true;
             return;
         }
