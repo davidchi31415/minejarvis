@@ -1,5 +1,5 @@
 export interface StateData {
     action: Number;
-    params: {};
+    params: any;
     stack: [any];
 };
