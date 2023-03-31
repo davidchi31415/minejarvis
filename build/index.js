@@ -97,6 +97,7 @@ const data = {
     params: {
         // Even things that are not being used must be initialized.
         followRadius: 5,
+        fightRadius: 20,
         blockName: 'emerald_ore',
         mobName: 'Zombie',
         quantity: 0,
@@ -143,8 +144,8 @@ bot.on('chat', (username, message) => __awaiter(void 0, void 0, void 0, function
         data.action = mappings_js_1.default.IDLE;
         yield wait(100);
         data.params.mobName = message.split(' ')[1];
-        data.params.followRadius = 5;
-        data.params.quantity = 2;
+        data.params.fightRadius = 20;
+        data.params.quantity = 100000;
         data.action = mappings_js_1.default.FIGHT;
         return;
     }

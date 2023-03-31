@@ -44,42 +44,32 @@ function createFightActionState(bot: Bot, data: any) {
       child: findNearestMobState, 
       shouldTransition: () => {
         findNearestMobState.mobs = [data.params.mobName];
-        return false;
-      },
-    }),
-
-
-    new StateTransition({
-      // Attempt to find the nearest block
-      parent: findNearestMobState,
-      child: goToMobState,
-      shouldTransition: () => {
-        if (targets.entity && targets.entity.position.distanceTo(bot.entity.position) <= data.params.fightRadius) {
-          console.log('FOUND MOB');
-          return true;
-        }
-        return false;
-      },
-    }),
-    new StateTransition({
-      // If block of certain type isn't found then leave
-      parent: findNearestMobState,
-      child: exit,
-      shouldTransition: () => {
-        console.log(`[Fight Action] Error: Could not find ${data.params.mobName} mob in radius of ${data.params.fightRadius} blocks`);
-        leaveAction(data);
         return true;
       },
     }),
 
     new StateTransition({
-      parent: goToMobState,
+      parent: findNearestMobState,
       child: fightMobState,
       shouldTransition: () => {
-        if (goToMobState.distanceToTarget() <= 2) {
+        if (targets.entity) {
           console.log('TRANSITIONING TO FIGHTING');
           return true;
         }
+        return false;
+      },
+    }),
+
+    new StateTransition({
+      // If mob of certain type isn't found then leave
+      parent: findNearestMobState,
+      child: exit,
+      shouldTransition: () => {
+        if (!targets.entity) {
+          console.log(`[Fight Action] Error: Could not find ${data.params.mobName} mob in radius of ${data.params.fightRadius} blocks`);
+          leaveAction(data);
+          return true;
+        }  
         return false;
       },
     }),
@@ -98,14 +88,11 @@ function createFightActionState(bot: Bot, data: any) {
     }),
     new StateTransition({
       parent: fightMobState,
-      child: setMobState,
+      child: findNearestMobState,
       shouldTransition: () => {
         if (data.params.quantity > 1 && fightMobState.isFinished) {
           console.log('finished fighting');
-          setTimeout(() => {
-            data.params.quantity -= 1;
-            return true;
-          }, 1000);
+          data.params.quantity -= 1;
           return true;
         }
         return false;
@@ -116,7 +103,7 @@ function createFightActionState(bot: Bot, data: any) {
       parent: fightMobState,
       child: findNearestMobState,
       shouldTransition: () => {
-        if (targets.entity.position.distanceTo(bot.entity.position) > 5) {
+        if (targets.entity.position.distanceTo(bot.entity.position) > 3) {
           return true;
         }
         return false;

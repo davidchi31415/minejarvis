@@ -150,7 +150,7 @@ bot.on('chat', async (username: string, message: string) => {
     await wait(100);
     data.params.mobName = message.split(' ')[1]
     data.params.fightRadius = 20;
-    data.params.quantity = 2; 
+    data.params.quantity = 100000; 
     data.action = actionTokens.FIGHT;
 
     return;

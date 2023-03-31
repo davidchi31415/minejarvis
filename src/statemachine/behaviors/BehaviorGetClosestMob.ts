@@ -43,7 +43,7 @@ export class BehaviorGetClosestMob implements StateBehavior {
    * @returns The closest entity, or null if there are none.
    */
   private getClosestMob(): Entity | null {
-    const mobFilter = (e: Entity) => true; // e.mobType?.toUpperCase() === 'ZOMBIE';
+    const mobFilter = (e: Entity) => e.mobType?.toUpperCase() === 'ZOMBIE';
     const mob = this.bot.nearestEntity(mobFilter);
     return mob;
   }

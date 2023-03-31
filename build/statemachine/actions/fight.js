@@ -44,37 +44,28 @@ function createFightActionState(bot, data) {
             child: findNearestMobState,
             shouldTransition: () => {
                 findNearestMobState.mobs = [data.params.mobName];
-                return false;
+                return true;
             },
         }),
         new mineflayer_statemachine_1.StateTransition({
-            // Attempt to find the nearest block
             parent: findNearestMobState,
-            child: goToMobState,
+            child: fightMobState,
             shouldTransition: () => {
                 if (targets.entity) {
-                    console.log('FOUND MOB');
+                    console.log('TRANSITIONING TO FIGHTING');
                     return true;
                 }
                 return false;
             },
         }),
         new mineflayer_statemachine_1.StateTransition({
-            // If block of certain type isn't found then leave
+            // If mob of certain type isn't found then leave
             parent: findNearestMobState,
             child: exit,
             shouldTransition: () => {
-                console.log(`[Fight Action] Error: Could not find ${data.params.mobName} mob`);
-                leaveAction(data);
-                return true;
-            },
-        }),
-        new mineflayer_statemachine_1.StateTransition({
-            parent: goToMobState,
-            child: fightMobState,
-            shouldTransition: () => {
-                if (goToMobState.distanceToTarget() <= 2) {
-                    console.log('TRANSITIONING TO FIGHTING');
+                if (!targets.entity) {
+                    console.log(`[Fight Action] Error: Could not find ${data.params.mobName} mob in radius of ${data.params.fightRadius} blocks`);
+                    leaveAction(data);
                     return true;
                 }
                 return false;
@@ -94,14 +85,11 @@ function createFightActionState(bot, data) {
         }),
         new mineflayer_statemachine_1.StateTransition({
             parent: fightMobState,
-            child: setMobState,
+            child: findNearestMobState,
             shouldTransition: () => {
                 if (data.params.quantity > 1 && fightMobState.isFinished) {
                     console.log('finished fighting');
-                    setTimeout(() => {
-                        data.params.quantity -= 1;
-                        return true;
-                    }, 1000);
+                    data.params.quantity -= 1;
                     return true;
                 }
                 return false;
@@ -111,7 +99,7 @@ function createFightActionState(bot, data) {
             parent: fightMobState,
             child: findNearestMobState,
             shouldTransition: () => {
-                if (targets.entity.position.distanceTo(bot.entity.position) > 5) {
+                if (targets.entity.position.distanceTo(bot.entity.position) > 3) {
                     return true;
                 }
                 return false;
