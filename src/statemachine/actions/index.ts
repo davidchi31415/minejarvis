@@ -1,11 +1,3 @@
-import createMineActionState from './mine';
-import createFollowPlayerActionState from './follow';
-import createFightActionState from './fight';
-
-const actionStates = {
-  createMineActionState,
-  createFollowPlayerActionState,
-  createFightActionState,
-};
-
-export default actionStates;
+export * from './mine';
+export * from './follow';
+export * from './fight';

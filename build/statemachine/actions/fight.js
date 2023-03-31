@@ -97,6 +97,7 @@ function createFightActionState(bot, data) {
             child: findNearestMobState,
             shouldTransition: () => {
                 if (targets.entity.position.distanceTo(bot.entity.position) > 3) {
+                    targets.entity = null;
                     return true;
                 }
                 return false;

@@ -1,5 +1,12 @@
-import actionStates from './actions/index.js';
-import actionTokens from './mappings.js';
+// MineJARVIS API
+import { 
+  createFollowPlayerActionState,
+  createFightActionState,
+  createMineActionState
+} from './actions';
+import actionTokens from './mappings';
+
+// Mineflayer API
 import {
   StateTransition,
   NestedStateMachine,
@@ -22,12 +29,12 @@ function createRootLayer(bot: Bot, data: any) {
 
   const idleActionState = new BehaviorIdle();
 
-  const followActionState = actionStates.createFollowPlayerActionState(
+  const followActionState = createFollowPlayerActionState(
     bot,
     data
   );
-  const mineActionState = actionStates.createMineActionState(bot, data);
-  const fightActionState = actionStates.createFightActionState(bot, data);
+  const mineActionState = createMineActionState(bot, data);
+  const fightActionState = createFightActionState(bot, data);
 
   const idleToActionTransitions = [
     new StateTransition({

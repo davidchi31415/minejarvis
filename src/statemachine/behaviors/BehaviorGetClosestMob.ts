@@ -2,6 +2,8 @@ import {StateBehavior, StateMachineTargets} from 'mineflayer-statemachine';
 import {Bot} from 'mineflayer';
 import {Entity} from 'prismarine-entity';
 import {plugin as pvpPlugin} from 'mineflayer-pvp';
+
+
 /**
  * Gets the closest entity to the bot and sets it as the entity
  * target. This behavior executes once right when the behavior
