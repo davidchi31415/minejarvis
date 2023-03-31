@@ -12,6 +12,7 @@ class BehaviorGetClosestMob {
         this.stateName = 'getClosestEntity';
         this.active = false;
         this.mobs = [];
+        this.mobType = "";
         this.bot = bot;
         this.targets = targets;
         this.bot.loadPlugin(mineflayer_pvp_1.plugin);
@@ -19,8 +20,11 @@ class BehaviorGetClosestMob {
     onStateEntered() {
         var _a;
         this.targets.entity = (_a = this.getClosestMob()) !== null && _a !== void 0 ? _a : undefined;
-        if (this.targets.entity) {
+        if (this.targets.entity && this.bot.entity.position.distanceTo(this.targets.entity.position) < this.radius) {
             this.targets.position = this.targets.entity.position;
+        }
+        else {
+            this.targets.entity = undefined;
         }
     }
     /**
@@ -29,7 +33,19 @@ class BehaviorGetClosestMob {
      * @returns The closest entity, or null if there are none.
      */
     getClosestMob() {
-        const mobFilter = (e) => { var _a; return ((_a = e.mobType) === null || _a === void 0 ? void 0 : _a.toUpperCase()) === 'ZOMBIE'; };
+        let mobFilter = null;
+        console.log(this.mobType);
+        console.log(this.mobs[0]);
+        if (this.mobType != null && this.mobType != undefined) {
+            console.log(this.mobType);
+            mobFilter = (e) => e.kind === this.mobType;
+        }
+        else if (this.mobs[0] != null && this.mobs[0] != undefined) {
+            mobFilter = (e) => e.mobType === this.mobs[0];
+        }
+        else {
+            mobFilter = (e) => { var _a; return ((_a = e.mobType) === null || _a === void 0 ? void 0 : _a.toUpperCase()) === 'ZOMBIE'; };
+        }
         const mob = this.bot.nearestEntity(mobFilter);
         return mob;
     }

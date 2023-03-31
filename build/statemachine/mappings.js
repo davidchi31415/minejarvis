@@ -5,5 +5,6 @@ const actionTokens = {
     FOLLOW_PLAYER: 1,
     MINE: 2,
     FIGHT: 3,
+    GUARD: 4,
 };
 exports.default = actionTokens;

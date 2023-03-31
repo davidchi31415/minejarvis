@@ -12,10 +12,9 @@ function wait(ms: number) {
 }
 
 async function leaveAction(data: any) {
-  await wait(1000);
-  data.stack.pop();
+  //data.stack.pop();
   data.action = data.stack[data.stack.length - 1];
-  console.log('FINISHED');
+  console.log(data.stack);
 }
 
 function createFightActionState(bot: Bot, data: any) {
@@ -29,10 +28,10 @@ function createFightActionState(bot: Bot, data: any) {
   const targets: any = {};
 
   // Enter and Exit
+  const setMobState = new BehaviorIdle();
   const exit = new BehaviorIdle();
 
   // Fighting behavior states
-  const setMobState = new BehaviorIdle();
   const findNearestMobState = new BehaviorGetClosestMob(bot, targets);
   const fightMobState = new BehaviorFightMob(bot, targets);
   const transitions = [
@@ -42,6 +41,8 @@ function createFightActionState(bot: Bot, data: any) {
       child: findNearestMobState, 
       shouldTransition: () => {
         findNearestMobState.mobs = [data.params.mobName];
+        findNearestMobState.mobType = data.params.mobType;
+        findNearestMobState.radius = data.params.fightRadius;
         return true;
       },
     }),
@@ -63,6 +64,7 @@ function createFightActionState(bot: Bot, data: any) {
       parent: findNearestMobState,
       child: exit,
       shouldTransition: () => {
+          console.log("1");
           console.log(`[Fight Action] Error: Could not find ${data.params.mobName} mob in radius of ${data.params.fightRadius} blocks`);
           leaveAction(data);
           return true;

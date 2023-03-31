@@ -1,5 +1,6 @@
 import mineflayer from 'mineflayer';
 import pathfinder_plugin from 'mineflayer-pathfinder';
+import {Vec3} from 'vec3'
 const {pathfinder} = pathfinder_plugin;
 import {plugin as pvp} from 'mineflayer-pvp';
 
@@ -91,7 +92,10 @@ const data = {
     fightRadius : 20,
     blockName: 'emerald_ore',
     mobName : 'Zombie',
+    mobType : 'Hostile',
+    guardPos : new Vec3(0, 0, 0),
     quantity: 0,
+
   },
   stack: [actionTokens.FOLLOW_PLAYER],
 };
@@ -155,6 +159,18 @@ bot.on('chat', async (username: string, message: string) => {
 
     return;
   }
+
+  if (message.split(' ')[0] === '[GUARD]') {
+    console.log('Attempting to Switch to Guard.');
+    data.action = actionTokens.IDLE;
+    await wait(100);
+    data.params.mobType = "Hostile mobs"
+    data.params.guardPos = bot.entity.position;
+    data.params.fightRadius = parseInt(message.split(' ')[1]);
+    data.action = actionTokens.GUARD;
+    return;
+  }
+
 });
 
 // Log errors and kick reasons:

@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mineflayer_1 = __importDefault(require("mineflayer"));
 const mineflayer_pathfinder_1 = __importDefault(require("mineflayer-pathfinder"));
+const vec3_1 = require("vec3");
 const { pathfinder } = mineflayer_pathfinder_1.default;
 const mineflayer_pvp_1 = require("mineflayer-pvp");
 const mineflayer_statemachine_1 = require("mineflayer-statemachine");
@@ -100,6 +101,8 @@ const data = {
         fightRadius: 20,
         blockName: 'emerald_ore',
         mobName: 'Zombie',
+        mobType: 'Hostile',
+        guardPos: new vec3_1.Vec3(0, 0, 0),
         quantity: 0,
     },
     stack: [mappings_js_1.default.FOLLOW_PLAYER],
@@ -147,6 +150,16 @@ bot.on('chat', (username, message) => __awaiter(void 0, void 0, void 0, function
         data.params.fightRadius = 20;
         data.params.quantity = 100000;
         data.action = mappings_js_1.default.FIGHT;
+        return;
+    }
+    if (message.split(' ')[0] === '[GUARD]') {
+        console.log('Attempting to Switch to Guard.');
+        data.action = mappings_js_1.default.IDLE;
+        yield wait(100);
+        data.params.mobType = "Hostile mobs";
+        data.params.guardPos = bot.entity.position;
+        data.params.fightRadius = parseInt(message.split(' ')[1]);
+        data.action = mappings_js_1.default.GUARD;
         return;
     }
 }));

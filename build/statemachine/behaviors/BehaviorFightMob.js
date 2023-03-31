@@ -43,12 +43,16 @@ class BehaviorFightMob {
             }, 100);
         }
         if (this.targets.entity) {
-            this.bot.pvp.attack(this.targets.entity);
+            setTimeout(() => {
+                if (this.targets.entity) {
+                    this.bot.pvp.attack(this.targets.entity);
+                    this.isFinished = true;
+                }
+            }, 50);
         }
         else {
             console.log('NO MOB FOUND!');
         }
-        this.isFinished = true;
     }
 }
 exports.BehaviorFightMob = BehaviorFightMob;

@@ -20,6 +20,9 @@ export class BehaviorGetClosestMob implements StateBehavior {
   x?: number;
   y?: number;
   mobs: string[] = [];
+  mobType: string = "";
+
+  radius:any;
 
   constructor(
     bot: Bot,
@@ -32,8 +35,10 @@ export class BehaviorGetClosestMob implements StateBehavior {
 
   onStateEntered(): void {
     this.targets.entity = this.getClosestMob() ?? undefined;
-    if (this.targets.entity) {
+    if (this.targets.entity && this.bot.entity.position.distanceTo(this.targets.entity.position) < this.radius) {
       this.targets.position = this.targets.entity.position;
+    } else {
+      this.targets.entity = undefined;
     }
   }
 
@@ -43,8 +48,20 @@ export class BehaviorGetClosestMob implements StateBehavior {
    * @returns The closest entity, or null if there are none.
    */
   private getClosestMob(): Entity | null {
-    const mobFilter = (e: Entity) => e.mobType?.toUpperCase() === 'ZOMBIE';
+
+    let mobFilter:any = null;
+    console.log(this.mobType)
+    console.log(this.mobs[0])
+    if (this.mobType != null && this.mobType != undefined) {
+      console.log(this.mobType)
+      mobFilter = (e: Entity) => e.kind === this.mobType;
+    } else if (this.mobs[0] != null && this.mobs[0] != undefined) {
+      mobFilter = (e: Entity) => e.mobType === this.mobs[0];
+    } else {
+      mobFilter = (e: Entity) => e.mobType?.toUpperCase() === 'ZOMBIE';
+    }
     const mob = this.bot.nearestEntity(mobFilter);
+
     return mob;
   }
 }

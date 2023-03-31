@@ -3,6 +3,7 @@ const actionTokens = {
   FOLLOW_PLAYER: 1,
   MINE: 2,
   FIGHT: 3,
+  GUARD: 4,
 };
 
 export default actionTokens;
