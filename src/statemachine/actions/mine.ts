@@ -20,7 +20,7 @@ async function leaveAction(data: any) {
   console.log('FINISHED');
 }
 
-function createMineActionState(bot: Bot, data: any) {
+export function createMineActionState(bot: Bot, data: any) {
   /**
    *  data is passed in from the bot root layer.
    *
@@ -119,5 +119,3 @@ function createMineActionState(bot: Bot, data: any) {
 
   return new NestedStateMachine(transitions, setBlockState, exit);
 }
-
-export default createMineActionState;

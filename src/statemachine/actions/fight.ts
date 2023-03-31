@@ -17,7 +17,7 @@ async function leaveAction(data: any) {
   console.log(data.stack);
 }
 
-function createFightActionState(bot: Bot, data: any) {
+export function createFightActionState(bot: Bot, data: any) {
   /**
    *  data is passed in from the bot root layer.
    *
@@ -112,5 +112,3 @@ function createFightActionState(bot: Bot, data: any) {
 
   return new NestedStateMachine(transitions, setMobState, exit);
 }
-
-export default createFightActionState;

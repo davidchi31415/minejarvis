@@ -1,25 +1,30 @@
-import mineflayer from 'mineflayer';
+// MineJARVIS API
+import createRootLayer from './statemachine';
+import actionTokens from './statemachine/mappings';
+import { StateData } from './interfaces';
+
+// Mineflayer API
+import mineflayer, { Bot } from 'mineflayer';
 import pathfinder_plugin from 'mineflayer-pathfinder';
 import {Vec3} from 'vec3'
 const {pathfinder} = pathfinder_plugin;
 import {plugin as pvp} from 'mineflayer-pvp';
+import {BotStateMachine, NestedStateMachine, StateMachineWebserver} from 'mineflayer-statemachine';
 
-import {BotStateMachine, StateMachineWebserver} from 'mineflayer-statemachine';
-import createRootLayer from './statemachine/index.js';
-import actionTokens from './statemachine/mappings.js';
+// OpenAI API
 import {Configuration, OpenAIApi} from 'openai';
 
-const MINECRAFT_IP = '10.254.214.217';
-const MINECRAFT_PORT = 25565;
-const WEBVIEWER_PORT = 3005;
-const API_KEY = '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';
+const MINECRAFT_IP: string = '10.254.214.217';
+const MINECRAFT_PORT: number = 25565;
+const WEBVIEWER_PORT: number = 3005;
+const API_KEY: string = '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';
 
-const configuration = new Configuration({
+const configuration: Configuration = new Configuration({
   apiKey: API_KEY,
 });
-const openai = new OpenAIApi(configuration);
+const openai: OpenAIApi = new OpenAIApi(configuration);
 
-const messages : any = [
+const messages: any = [
   {
     role: 'user',
     content:
@@ -46,7 +51,7 @@ async function query(message: string) {
   return messages[messages.length - 1].content;
 }
 
-const bot = mineflayer.createBot({
+const bot: Bot = mineflayer.createBot({
   host: MINECRAFT_IP, // minecraft server ip
   username: 'Jarvis', // minecraft username
   port: MINECRAFT_PORT,
@@ -59,32 +64,7 @@ function wait(ms: any) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function boredGesture() {
-  const player = bot.players['CatBranchman'];
-  if (player?.entity) {
-    bot.lookAt(player.entity.position);
-    await wait(500);
-
-    const numSwings = Math.floor(Math.random() * 20) + 1;
-    let sneak = false;
-    for (let i = 0; i < numSwings; i++) {
-      if (!sneak) {
-        sneak = Math.random() < 0.5;
-        if (sneak) bot.setControlState('sneak', true);
-      }
-      bot.swingArm('right');
-      await wait(150);
-      bot.lookAt(player.entity.position);
-      if (sneak) {
-        if (Math.random() < 0.5) sneak = false;
-        if (!sneak) bot.setControlState('sneak', false);
-      }
-    }
-    bot.setControlState('sneak', false);
-  }
-}
-
-const data = {
+const data: StateData = {
   action: actionTokens.FOLLOW_PLAYER,
   params: {
     // Even things that are not being used must be initialized.
@@ -103,10 +83,10 @@ const data = {
 bot.once('spawn', async () => {
   // bot.pathfinder.dontCreateFlow = false; // Let the bot destroy blocks touching water to get to places.
 
-  const rootLayer = createRootLayer(bot, data);
-  const stateMachine = new BotStateMachine(bot, rootLayer);
+  const rootLayer: NestedStateMachine = createRootLayer(bot, data);
+  const stateMachine: BotStateMachine = new BotStateMachine(bot, rootLayer);
 
-  const webserver = new StateMachineWebserver(
+  const webserver: StateMachineWebserver = new StateMachineWebserver(
     bot,
     stateMachine,
     WEBVIEWER_PORT
