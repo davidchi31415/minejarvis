@@ -19,7 +19,7 @@ import { BehaviorReturnToGuard } from '../behaviors/BehaviorReturnToGuard';
     console.log('FINISHED');
   }
   
-  export function createGuardActionState(bot: Bot, data: any) {
+    export function createGuardActionState(bot: Bot, data: any) {
     /**
      *  data is passed in from the bot root layer.
      *

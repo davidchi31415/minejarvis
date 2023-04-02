@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createMineActionState = void 0;
 const mineflayer_statemachine_1 = require("mineflayer-statemachine");
 const minecraft_data_1 = __importDefault(require("minecraft-data"));
 function wait(ms) {
@@ -113,4 +114,4 @@ function createMineActionState(bot, data) {
     ];
     return new mineflayer_statemachine_1.NestedStateMachine(transitions, setBlockState, exit);
 }
-exports.default = createMineActionState;
+exports.createMineActionState = createMineActionState;

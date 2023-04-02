@@ -17,7 +17,7 @@ import {Configuration, OpenAIApi} from 'openai';
 const MINECRAFT_IP: string = '10.254.214.217';
 const MINECRAFT_PORT: number = 25565;
 const WEBVIEWER_PORT: number = 3005;
-const API_KEY: string = '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';
+const API_KEY: string = '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';
 
 const configuration: Configuration = new Configuration({
   apiKey: API_KEY,
@@ -28,13 +28,19 @@ const messages: any = [
   {
     role: 'user',
     content:
-      "Rules for response: \
-    * Your name is Jarvis. \
-    * You are playing Minecraft with a friend named David. \
-    * You speak using informal language. For example, use 'k' and 'alright' instead of 'okay' and 'all right.' Use slang terms like 'bro' frequently. \
-    * You use abbreviations and simplified spelling, and you do not capitalize the first word of each sentence. \
-    * You are in the same Minecraft world as David and are playing at the same time (but not necessarily at the same place). \
-    * If possible, limit each message to within 15 words. Be concise.",
+      "Your name is Jarvis. You are playing Minecraft with a friend named David. \
+    You are in the same Minecraft world as David and are playing at the same time (but not necessarily at the same place). \
+    If possible, limit each message to within 15 words. Be concise. \
+    Here is how to respond to a message.\
+    You have the following four possible action tokens:\
+    * [MINE], mines a block\
+    * [FOLLOW], follows the player\
+    * [GUARD], guards a position against enemies\
+    * [FIGHT], fights a nearby enemy but does not guard a specific position\
+    If you deem it necessary to perform an action, specify that action at the beginning of your response. Then, process with whatever\
+    message you wish to say, after the action token. The following are examples of valid responses:\
+    `[FOLLOW] I will follow you now.`, `[FIGHT] I see the zombies! I will fight them for you.\
+    Note that it is important you always enclose the action token in brackets (but NOT the message after it).",
   },
 ];
 
@@ -72,7 +78,7 @@ const data: StateData = {
     fightRadius : 20,
     blockName: 'emerald_ore',
     mobName : 'Zombie',
-    mobType : 'Hostile',
+    mobType : 'Hostile mobs',
     guardPos : new Vec3(0, 0, 0),
     quantity: 0,
 
@@ -94,62 +100,63 @@ bot.once('spawn', async () => {
   webserver.startServer();
 });
 
-// bot.on('chat', async (username, message) => {
-//   if (username === bot.username) return;
-//   const response = await query(message);
-//   console.log(response);
-//   bot.chat(response);
-//   await boredGesture();
-// 2});
 
 bot.on('chat', async (username: string, message: string) => {
-  if (username === bot.username) return;
-
-  if (message.split(' ')[0] === '[MINE]') {
-    console.log('Attempting to Switch to Mine.');
-
-    data.action = actionTokens.IDLE;
-    await wait(100);
-    data.params.blockName = message.split(' ')[1];
-    data.params.quantity = 2;
-    data.action = actionTokens.MINE;
-    data.stack.push(actionTokens.MINE);
-
-    return;
+  if (username !== bot.username) {
+    const response = await query(message);
+    console.log(response);
+    bot.chat(response);
   }
-  if (message.split(' ')[0] === '[FOLLOW]') {
-    console.log('Attempting to Switch to Follow.');
+  
+  if (username === bot.username) {
+    if (message.split(' ')[0] === '[MINE]') {
+      console.log('Attempting to Switch to Mine.');
 
-    data.action = actionTokens.IDLE;
-    await wait(100);
-    data.params.followRadius = 5;
-    data.action = actionTokens.FOLLOW_PLAYER;
+      data.action = actionTokens.IDLE;
+      await wait(100);
+      data.params.blockName = "emerald_ore";
+      data.params.quantity = 2;
+      data.action = actionTokens.MINE;
+      data.stack.push(actionTokens.MINE);
 
-    return;
+      return;
+    }
+    if (message.split(' ')[0] === '[FOLLOW]') {
+      console.log('Attempting to Switch to Follow.');
+
+      data.action = actionTokens.IDLE;
+      await wait(100);
+      data.params.followRadius = 5;
+      data.action = actionTokens.FOLLOW_PLAYER;
+
+      return;
+    }
+    if (message.split(' ')[0] === '[FIGHT]') {
+      console.log('Attempting to Switch to Fight.');
+
+      data.action = actionTokens.IDLE;
+      await wait(100);
+      data.params.mobName = 'Zombie'
+      data.params.mobType = "Hostile mobs"
+      data.params.fightRadius = 20;
+      data.params.quantity = 100000; 
+      data.action = actionTokens.FIGHT;
+
+      return;
+    }
+
+    if (message.split(' ')[0] === '[GUARD]') {
+      console.log('Attempting to Switch to Guard.');
+      data.action = actionTokens.IDLE;
+      await wait(100);
+      data.params.mobType = "Hostile mobs"
+      data.params.guardPos = bot.entity.position;
+      data.params.fightRadius = "10";
+      data.action = actionTokens.GUARD;
+      return;
+    }
   }
-  if (message.split(' ')[0] === '[FIGHT]') {
-    console.log('Attempting to Switch to Fight.');
 
-    data.action = actionTokens.IDLE;
-    await wait(100);
-    data.params.mobName = message.split(' ')[1]
-    data.params.fightRadius = 20;
-    data.params.quantity = 100000; 
-    data.action = actionTokens.FIGHT;
-
-    return;
-  }
-
-  if (message.split(' ')[0] === '[GUARD]') {
-    console.log('Attempting to Switch to Guard.');
-    data.action = actionTokens.IDLE;
-    await wait(100);
-    data.params.mobType = "Hostile mobs"
-    data.params.guardPos = bot.entity.position;
-    data.params.fightRadius = parseInt(message.split(' ')[1]);
-    data.action = actionTokens.GUARD;
-    return;
-  }
 
 });
 

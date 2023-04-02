@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createFollowPlayerActionState = void 0;
 const mineflayer_statemachine_1 = require("mineflayer-statemachine");
 function createFollowPlayerActionState(bot, data) {
     /**
@@ -39,4 +40,4 @@ function createFollowPlayerActionState(bot, data) {
     ];
     return new mineflayer_statemachine_1.NestedStateMachine(transitions, getClosestPlayerState, exit);
 }
-exports.default = createFollowPlayerActionState;
+exports.createFollowPlayerActionState = createFollowPlayerActionState;

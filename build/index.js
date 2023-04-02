@@ -12,19 +12,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// MineJARVIS API
+const statemachine_1 = __importDefault(require("./statemachine"));
+const mappings_1 = __importDefault(require("./statemachine/mappings"));
+// Mineflayer API
 const mineflayer_1 = __importDefault(require("mineflayer"));
 const mineflayer_pathfinder_1 = __importDefault(require("mineflayer-pathfinder"));
 const vec3_1 = require("vec3");
 const { pathfinder } = mineflayer_pathfinder_1.default;
 const mineflayer_pvp_1 = require("mineflayer-pvp");
 const mineflayer_statemachine_1 = require("mineflayer-statemachine");
-const index_js_1 = __importDefault(require("./statemachine/index.js"));
-const mappings_js_1 = __importDefault(require("./statemachine/mappings.js"));
+// OpenAI API
 const openai_1 = require("openai");
 const MINECRAFT_IP = '10.254.214.217';
 const MINECRAFT_PORT = 25565;
 const WEBVIEWER_PORT = 3005;
-const API_KEY = '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';
+const API_KEY = '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';
 const configuration = new openai_1.Configuration({
     apiKey: API_KEY,
 });
@@ -32,13 +35,19 @@ const openai = new openai_1.OpenAIApi(configuration);
 const messages = [
     {
         role: 'user',
-        content: "Rules for response: \
-    * Your name is Jarvis. \
-    * You are playing Minecraft with a friend named David. \
-    * You speak using informal language. For example, use 'k' and 'alright' instead of 'okay' and 'all right.' Use slang terms like 'bro' frequently. \
-    * You use abbreviations and simplified spelling, and you do not capitalize the first word of each sentence. \
-    * You are in the same Minecraft world as David and are playing at the same time (but not necessarily at the same place). \
-    * If possible, limit each message to within 15 words. Be concise.",
+        content: "Your name is Jarvis. You are playing Minecraft with a friend named David. \
+    You are in the same Minecraft world as David and are playing at the same time (but not necessarily at the same place). \
+    If possible, limit each message to within 15 words. Be concise. \
+    Here is how to respond to a message.\
+    You have the following four possible action tokens:\
+    * [MINE], mines a block\
+    * [FOLLOW], follows the player\
+    * [GUARD], guards a position against enemies\
+    * [FIGHT], fights a nearby enemy but does not guard a specific position\
+    If you deem it necessary to perform an action, specify that action at the beginning of your response. Then, process with whatever\
+    message you wish to say, after the action token. The following are examples of valid responses:\
+    `[FOLLOW] I will follow you now.`, `[FIGHT] I see the zombies! I will fight them for you.\
+    Note that it is important you always enclose the action token in brackets (but NOT the message after it).",
     },
 ];
 function query(message) {
@@ -65,36 +74,8 @@ bot.loadPlugin(mineflayer_pvp_1.plugin);
 function wait(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-function boredGesture() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const player = bot.players['CatBranchman'];
-        if (player === null || player === void 0 ? void 0 : player.entity) {
-            bot.lookAt(player.entity.position);
-            yield wait(500);
-            const numSwings = Math.floor(Math.random() * 20) + 1;
-            let sneak = false;
-            for (let i = 0; i < numSwings; i++) {
-                if (!sneak) {
-                    sneak = Math.random() < 0.5;
-                    if (sneak)
-                        bot.setControlState('sneak', true);
-                }
-                bot.swingArm('right');
-                yield wait(150);
-                bot.lookAt(player.entity.position);
-                if (sneak) {
-                    if (Math.random() < 0.5)
-                        sneak = false;
-                    if (!sneak)
-                        bot.setControlState('sneak', false);
-                }
-            }
-            bot.setControlState('sneak', false);
-        }
-    });
-}
 const data = {
-    action: mappings_js_1.default.FOLLOW_PLAYER,
+    action: mappings_1.default.FOLLOW_PLAYER,
     params: {
         // Even things that are not being used must be initialized.
         followRadius: 5,
@@ -105,62 +86,61 @@ const data = {
         guardPos: new vec3_1.Vec3(0, 0, 0),
         quantity: 0,
     },
-    stack: [mappings_js_1.default.FOLLOW_PLAYER],
+    stack: [mappings_1.default.FOLLOW_PLAYER],
 };
 bot.once('spawn', () => __awaiter(void 0, void 0, void 0, function* () {
     // bot.pathfinder.dontCreateFlow = false; // Let the bot destroy blocks touching water to get to places.
-    const rootLayer = (0, index_js_1.default)(bot, data);
+    const rootLayer = (0, statemachine_1.default)(bot, data);
     const stateMachine = new mineflayer_statemachine_1.BotStateMachine(bot, rootLayer);
     const webserver = new mineflayer_statemachine_1.StateMachineWebserver(bot, stateMachine, WEBVIEWER_PORT);
     webserver.startServer();
 }));
-// bot.on('chat', async (username, message) => {
-//   if (username === bot.username) return;
-//   const response = await query(message);
-//   console.log(response);
-//   bot.chat(response);
-//   await boredGesture();
-// 2});
 bot.on('chat', (username, message) => __awaiter(void 0, void 0, void 0, function* () {
-    if (username === bot.username)
-        return;
-    if (message.split(' ')[0] === '[MINE]') {
-        console.log('Attempting to Switch to Mine.');
-        data.action = mappings_js_1.default.IDLE;
-        yield wait(100);
-        data.params.blockName = message.split(' ')[1];
-        data.params.quantity = 2;
-        data.action = mappings_js_1.default.MINE;
-        data.stack.push(mappings_js_1.default.MINE);
-        return;
+    if (username !== bot.username) {
+        const response = yield query(message);
+        console.log(response);
+        bot.chat(response);
     }
-    if (message.split(' ')[0] === '[FOLLOW]') {
-        console.log('Attempting to Switch to Follow.');
-        data.action = mappings_js_1.default.IDLE;
-        yield wait(100);
-        data.params.followRadius = 5;
-        data.action = mappings_js_1.default.FOLLOW_PLAYER;
-        return;
-    }
-    if (message.split(' ')[0] === '[FIGHT]') {
-        console.log('Attempting to Switch to Fight.');
-        data.action = mappings_js_1.default.IDLE;
-        yield wait(100);
-        data.params.mobName = message.split(' ')[1];
-        data.params.fightRadius = 20;
-        data.params.quantity = 100000;
-        data.action = mappings_js_1.default.FIGHT;
-        return;
-    }
-    if (message.split(' ')[0] === '[GUARD]') {
-        console.log('Attempting to Switch to Guard.');
-        data.action = mappings_js_1.default.IDLE;
-        yield wait(100);
-        data.params.mobType = "Hostile mobs";
-        data.params.guardPos = bot.entity.position;
-        data.params.fightRadius = parseInt(message.split(' ')[1]);
-        data.action = mappings_js_1.default.GUARD;
-        return;
+    if (username === bot.username) {
+        if (message.split(' ')[0] === '[MINE]') {
+            console.log('Attempting to Switch to Mine.');
+            data.action = mappings_1.default.IDLE;
+            yield wait(100);
+            data.params.blockName = "emerald_ore";
+            data.params.quantity = 2;
+            data.action = mappings_1.default.MINE;
+            data.stack.push(mappings_1.default.MINE);
+            return;
+        }
+        if (message.split(' ')[0] === '[FOLLOW]') {
+            console.log('Attempting to Switch to Follow.');
+            data.action = mappings_1.default.IDLE;
+            yield wait(100);
+            data.params.followRadius = 5;
+            data.action = mappings_1.default.FOLLOW_PLAYER;
+            return;
+        }
+        if (message.split(' ')[0] === '[FIGHT]') {
+            console.log('Attempting to Switch to Fight.');
+            data.action = mappings_1.default.IDLE;
+            yield wait(100);
+            data.params.mobName = 'Zombie';
+            data.params.mobType = "Hostile mobs";
+            data.params.fightRadius = 20;
+            data.params.quantity = 100000;
+            data.action = mappings_1.default.FIGHT;
+            return;
+        }
+        if (message.split(' ')[0] === '[GUARD]') {
+            console.log('Attempting to Switch to Guard.');
+            data.action = mappings_1.default.IDLE;
+            yield wait(100);
+            data.params.mobType = "Hostile mobs";
+            data.params.guardPos = bot.entity.position;
+            data.params.fightRadius = "10";
+            data.action = mappings_1.default.GUARD;
+            return;
+        }
     }
 }));
 // Log errors and kick reasons:

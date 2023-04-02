@@ -3,8 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const index_js_1 = __importDefault(require("./actions/index.js"));
-const mappings_js_1 = __importDefault(require("./mappings.js"));
+// MineJARVIS API
+const actions_1 = require("./actions");
+const mappings_1 = __importDefault(require("./mappings"));
+// Mineflayer API
 const mineflayer_statemachine_1 = require("mineflayer-statemachine");
 function createRootLayer(bot, data) {
     /**
@@ -19,52 +21,52 @@ function createRootLayer(bot, data) {
      *          look like.
      */
     const idleActionState = new mineflayer_statemachine_1.BehaviorIdle();
-    const followActionState = index_js_1.default.createFollowPlayerActionState(bot, data);
-    const mineActionState = index_js_1.default.createMineActionState(bot, data);
-    const fightActionState = index_js_1.default.createFightActionState(bot, data);
-    const guardActionState = index_js_1.default.createGuardActionState(bot, data);
+    const followActionState = (0, actions_1.createFollowPlayerActionState)(bot, data);
+    const mineActionState = (0, actions_1.createMineActionState)(bot, data);
+    const fightActionState = (0, actions_1.createFightActionState)(bot, data);
+    const guardActionState = (0, actions_1.createGuardActionState)(bot, data);
     const idleToActionTransitions = [
         new mineflayer_statemachine_1.StateTransition({
             parent: idleActionState,
             child: followActionState,
-            shouldTransition: () => data.action === mappings_js_1.default.FOLLOW_PLAYER,
+            shouldTransition: () => data.action === mappings_1.default.FOLLOW_PLAYER,
         }),
         new mineflayer_statemachine_1.StateTransition({
             parent: idleActionState,
             child: mineActionState,
-            shouldTransition: () => data.action === mappings_js_1.default.MINE,
+            shouldTransition: () => data.action === mappings_1.default.MINE,
         }),
         new mineflayer_statemachine_1.StateTransition({
             parent: idleActionState,
             child: fightActionState,
-            shouldTransition: () => data.action === mappings_js_1.default.FIGHT,
+            shouldTransition: () => data.action === mappings_1.default.FIGHT,
         }),
         new mineflayer_statemachine_1.StateTransition({
             parent: idleActionState,
             child: guardActionState,
-            shouldTransition: () => data.action === mappings_js_1.default.GUARD,
+            shouldTransition: () => data.action === mappings_1.default.GUARD,
         }),
     ];
     const actionToIdleTransitions = [
         new mineflayer_statemachine_1.StateTransition({
             parent: followActionState,
             child: idleActionState,
-            shouldTransition: () => data.action !== mappings_js_1.default.FOLLOW_PLAYER,
+            shouldTransition: () => data.action !== mappings_1.default.FOLLOW_PLAYER,
         }),
         new mineflayer_statemachine_1.StateTransition({
             parent: mineActionState,
             child: idleActionState,
-            shouldTransition: () => data.action !== mappings_js_1.default.MINE,
+            shouldTransition: () => data.action !== mappings_1.default.MINE,
         }),
         new mineflayer_statemachine_1.StateTransition({
             parent: fightActionState,
             child: idleActionState,
-            shouldTransition: () => data.action !== mappings_js_1.default.FIGHT,
+            shouldTransition: () => data.action !== mappings_1.default.FIGHT,
         }),
         new mineflayer_statemachine_1.StateTransition({
             parent: guardActionState,
             child: idleActionState,
-            shouldTransition: () => data.action !== mappings_js_1.default.GUARD,
+            shouldTransition: () => data.action !== mappings_1.default.GUARD,
         }),
     ];
     const transitions = [...idleToActionTransitions, ...actionToIdleTransitions];

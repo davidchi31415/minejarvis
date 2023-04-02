@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.createFightActionState = void 0;
 const mineflayer_statemachine_1 = require("mineflayer-statemachine");
 const BehaviorGetClosestMob_1 = require("../behaviors/BehaviorGetClosestMob");
 const BehaviorFightMob_1 = require("../behaviors/BehaviorFightMob");
@@ -108,4 +109,4 @@ function createFightActionState(bot, data) {
     ];
     return new mineflayer_statemachine_1.NestedStateMachine(transitions, setMobState, exit);
 }
-exports.default = createFightActionState;
+exports.createFightActionState = createFightActionState;
