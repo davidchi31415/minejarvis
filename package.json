@@ -6,13 +6,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "compile": "tsc",
-    "prepare": "npm.cmd run compile",
-    "pretest": "npm.cmd run compile",
-    "posttest": "npm.cmd run lint"
+    "prepare": "npm.c run compile",
+    "pretest": "npm run compile",
+    "posttest": "npm run lint"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "langchain": "^0.0.48",
     "minecraft-data": "^3.31.0",
     "mineflayer": "^4.8.1",
     "mineflayer-pathfinder": "^2.4.2",

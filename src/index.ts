@@ -11,50 +11,56 @@ const {pathfinder} = pathfinder_plugin;
 import {plugin as pvp} from 'mineflayer-pvp';
 import {BotStateMachine, NestedStateMachine, StateMachineWebserver} from 'mineflayer-statemachine';
 
-// OpenAI API
-import {Configuration, OpenAIApi} from 'openai';
+// LangChain API
+import { ChatOpenAI } from "langchain/chat_models";
+import { ChatAgent, AgentExecutor } from "langchain/agents";
+
+// Brain API
+import { MineTool } from './brain/tools';
 
 const MINECRAFT_IP: string = '10.254.214.217';
 const MINECRAFT_PORT: number = 25565;
 const WEBVIEWER_PORT: number = 3005;
 const API_KEY: string = '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';
 
-const configuration: Configuration = new Configuration({
-  apiKey: API_KEY,
-});
-const openai: OpenAIApi = new OpenAIApi(configuration);
 
-const messages: any = [
-  {
-    role: 'user',
-    content:
-      "Your name is Jarvis. You are playing Minecraft with a friend named David. \
-    You are in the same Minecraft world as David and are playing at the same time (but not necessarily at the same place). \
-    If possible, limit each message to within 15 words. Be concise. \
-    Here is how to respond to a message.\
-    You have the following four possible action tokens:\
-    * [MINE], mines a block\
-    * [FOLLOW], follows the player\
-    * [GUARD], guards a position against enemies\
-    * [FIGHT], fights a nearby enemy but does not guard a specific position\
-    If you deem it necessary to perform an action, specify that action at the beginning of your response. Then, process with whatever\
-    message you wish to say, after the action token. The following are examples of valid responses:\
-    `[FOLLOW] I will follow you now.`, `[FIGHT] I see the zombies! I will fight them for you.\
-    Note that it is important you always enclose the action token in brackets (but NOT the message after it).",
-  },
-];
+// const configuration: Configuration = new Configuration({
+//   apiKey: API_KEY,
+// });
+// const openai: OpenAIApi = new OpenAIApi(configuration);
+
+
+// const messages: any = [
+//   {
+//     role: 'user',
+//     content:
+//       "Your name is Jarvis. You are playing Minecraft with a friend named David. \
+//     You are in the same Minecraft world as David and are playing at the same time (but not necessarily at the same place). \
+//     If possible, limit each message to within 15 words. Be concise. \
+//     Here is how to respond to a message.\
+//     You have the following four possible action tokens:\
+//     * [MINE], mines a block\
+//     * [FOLLOW], follows the player\
+//     * [GUARD], guards a position against enemies\
+//     * [FIGHT], fights a nearby enemy but does not guard a specific position\
+//     If you deem it necessary to perform an action, specify that action at the beginning of your response. Then, process with whatever\
+//     message you wish to say, after the action token. The following are examples of valid responses:\
+//     `[FOLLOW] I will follow you now.`, `[FIGHT] I see the zombies! I will fight them for you.\
+//     Note that it is important you always enclose the action token in brackets (but NOT the message after it).",
+//   },
+// ];
 
 async function query(message: string) {
-  messages.push({
-    role: 'user',
-    content: message,
-  });
-  const completion = await openai.createChatCompletion({
-    model: 'gpt-3.5-turbo',
-    messages: messages,
-  });
-  messages.push(completion.data.choices[0].message);
-  return messages[messages.length - 1].content;
+  // messages.push({
+  //   role: 'user',
+  //   content: message,
+  // });
+  // const completion = await openai.createChatCompletion({
+  //   model: 'gpt-3.5-turbo',
+  //   messages: messages,
+  // });
+  // messages.push(completion.data.choices[0].message);
+  // return messages[messages.length - 1].content;
 }
 
 const bot: Bot = mineflayer.createBot({
@@ -86,6 +92,19 @@ const data: StateData = {
   stack: [actionTokens.FOLLOW_PLAYER],
 };
 
+const tools = [new MineTool(bot, data) ]; //, new GuardTool(bot, data), new FightTool(bot, data), new FollowTool(bot, data), ]
+const agent = ChatAgent.fromLLMAndTools(
+  new ChatOpenAI(
+    {
+      openAIApiKey: API_KEY,
+      modelName: "gpt3.5-turbo"
+    }
+  ), tools
+);
+const executor = AgentExecutor.fromAgentAndTools({ agent, tools });
+
+
+
 bot.once('spawn', async () => {
   // bot.pathfinder.dontCreateFlow = false; // Let the bot destroy blocks touching water to get to places.
 
@@ -102,14 +121,19 @@ bot.once('spawn', async () => {
 
 
 bot.on('chat', async (username: string, message: string) => {
-  if (username !== bot.username) {
-    const response = await query(message);
-    console.log(response);
-    bot.chat(response);
-  }
+  // if (username !== bot.username) {
+  //   const response = await query(message);
+  //   console.log(response);
+  //   bot.chat(response);
+  // }
   
   if (username === bot.username) {
-    if (message.split(' ')[0] === '[MINE]') {
+    const responseG = await executor.run(
+      message
+    );
+    console.log(responseG)
+
+    /*if (message.split(' ')[0] === '[MINE]') {
       console.log('Attempting to Switch to Mine.');
 
       data.action = actionTokens.IDLE;
@@ -154,10 +178,9 @@ bot.on('chat', async (username: string, message: string) => {
       data.params.fightRadius = "10";
       data.action = actionTokens.GUARD;
       return;
-    }
+    }*/
+    return;
   }
-
-
 });
 
 // Log errors and kick reasons:
