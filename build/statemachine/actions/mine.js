@@ -1,32 +1,15 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createMineActionState = void 0;
-const mineflayer_statemachine_1 = require("mineflayer-statemachine");
-const minecraft_data_1 = __importDefault(require("minecraft-data"));
+import { StateTransition, NestedStateMachine, BehaviorIdle, BehaviorMineBlock, BehaviorMoveTo, BehaviorFindBlock, } from 'mineflayer-statemachine';
+import mcDataFn from 'minecraft-data';
 function wait(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-function leaveAction(data) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield wait(1000);
-        data.stack.pop();
-        data.action = data.stack[data.stack.length - 1];
-        console.log('FINISHED');
-    });
+async function leaveAction(data) {
+    await wait(1000);
+    data.stack.pop();
+    data.action = data.stack[data.stack.length - 1];
+    console.log('FINISHED');
 }
-function createMineActionState(bot, data) {
+export function createMineActionState(bot, data) {
     /**
      *  data is passed in from the bot root layer.
      *
@@ -34,17 +17,17 @@ function createMineActionState(bot, data) {
      *      * quantity
      */
     const { blockName, quantity } = data.params;
-    const mcData = (0, minecraft_data_1.default)(bot.version);
+    const mcData = mcDataFn(bot.version);
     const targets = {};
     // Enter and Exit
-    const exit = new mineflayer_statemachine_1.BehaviorIdle();
+    const exit = new BehaviorIdle();
     // Mining behavior states
-    const findBlockState = new mineflayer_statemachine_1.BehaviorFindBlock(bot, targets); // Set the value of targets.position to the block found
-    const goToBlockState = new mineflayer_statemachine_1.BehaviorMoveTo(bot, targets);
-    const mineBlockState = new mineflayer_statemachine_1.BehaviorMineBlock(bot, targets);
-    const setBlockState = new mineflayer_statemachine_1.BehaviorIdle();
+    const findBlockState = new BehaviorFindBlock(bot, targets); // Set the value of targets.position to the block found
+    const goToBlockState = new BehaviorMoveTo(bot, targets);
+    const mineBlockState = new BehaviorMineBlock(bot, targets);
+    const setBlockState = new BehaviorIdle();
     const transitions = [
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: setBlockState,
             child: findBlockState,
             shouldTransition: () => {
@@ -55,7 +38,7 @@ function createMineActionState(bot, data) {
                 return true;
             },
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             // Attempt to find the nearest block
             parent: findBlockState,
             child: goToBlockState,
@@ -65,7 +48,7 @@ function createMineActionState(bot, data) {
                 return false;
             },
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             // If block of certain type isn't found then leave
             parent: findBlockState,
             child: exit,
@@ -75,7 +58,7 @@ function createMineActionState(bot, data) {
                 return true;
             },
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: goToBlockState,
             child: mineBlockState,
             shouldTransition: () => {
@@ -85,7 +68,7 @@ function createMineActionState(bot, data) {
                 return false;
             },
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: mineBlockState,
             child: exit,
             shouldTransition: () => {
@@ -96,7 +79,7 @@ function createMineActionState(bot, data) {
                 return false;
             },
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: mineBlockState,
             child: findBlockState,
             shouldTransition: () => {
@@ -112,6 +95,6 @@ function createMineActionState(bot, data) {
             },
         }),
     ];
-    return new mineflayer_statemachine_1.NestedStateMachine(transitions, setBlockState, exit);
+    return new NestedStateMachine(transitions, setBlockState, exit);
 }
-exports.createMineActionState = createMineActionState;
+//# sourceMappingURL=mine.js.map

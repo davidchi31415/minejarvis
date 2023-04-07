@@ -1,11 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.BehaviorFightMob = void 0;
 /**
  * This behavior will attempt to fight a mob. If the bot has
  * a sword and/or a shield, it will equip them.
  */
-class BehaviorFightMob {
+export class BehaviorFightMob {
     /**
      * Creates a new mine block behavior.
      *
@@ -55,4 +52,4 @@ class BehaviorFightMob {
         }
     }
 }
-exports.BehaviorFightMob = BehaviorFightMob;
+//# sourceMappingURL=BehaviorFightMob.js.map

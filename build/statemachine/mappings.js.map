@@ -1,0 +1,1 @@
+{"version":3,"file":"mappings.js","sourceRoot":"","sources":["../../src/statemachine/mappings.ts"],"names":[],"mappings":"AAAA,MAAM,YAAY,GAAG;IACnB,IAAI,EAAE,CAAC;IACP,aAAa,EAAE,CAAC;IAChB,IAAI,EAAE,CAAC;IACP,KAAK,EAAE,CAAC;IACR,KAAK,EAAE,CAAC;CACT,CAAC;AAEF,eAAe,YAAY,CAAC"}

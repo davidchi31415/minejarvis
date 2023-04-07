@@ -1,13 +1,11 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const base_1 = require("./base");
-class GuardTool extends base_1.BaseActionTool {
-    constructor() {
-        super(...arguments);
-        this.name = "GUARD";
-        this.description = "Call this when the bot is asked to guard a specific area from nearby enemies";
-    }
-    _call(arg) {
-        return new Promise(() => { });
-    }
-}
+// import { Tool } from 'langchain/tools';
+// import { BaseActionTool } from './base';
+export {};
+// class GuardTool extends BaseActionTool {
+//     _call(arg: string): Promise<string> {
+//         return new Promise(() => {});
+//     }
+//     name: string = "GUARD";
+//     description: string = "Call this when the bot is asked to guard a specific area from nearby enemies";
+// }
+//# sourceMappingURL=guard.js.map

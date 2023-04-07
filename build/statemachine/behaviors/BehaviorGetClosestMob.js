@@ -1,13 +1,10 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.EntityFilters = exports.BehaviorGetClosestMob = void 0;
-const mineflayer_pvp_1 = require("mineflayer-pvp");
+import { plugin as pvpPlugin } from 'mineflayer-pvp';
 /**
  * Gets the closest entity to the bot and sets it as the entity
  * target. This behavior executes once right when the behavior
  * is entered, and should transition out immediately.
  */
-class BehaviorGetClosestMob {
+export class BehaviorGetClosestMob {
     constructor(bot, targets) {
         this.stateName = 'getClosestEntity';
         this.active = false;
@@ -15,11 +12,10 @@ class BehaviorGetClosestMob {
         this.mobType = "";
         this.bot = bot;
         this.targets = targets;
-        this.bot.loadPlugin(mineflayer_pvp_1.plugin);
+        this.bot.loadPlugin(pvpPlugin);
     }
     onStateEntered() {
-        var _a;
-        this.targets.entity = (_a = this.getClosestMob()) !== null && _a !== void 0 ? _a : undefined;
+        this.targets.entity = this.getClosestMob() ?? undefined;
         if (this.targets.entity && this.bot.entity.position.distanceTo(this.targets.entity.position) < this.radius) {
             this.targets.position = this.targets.entity.position;
         }
@@ -44,18 +40,17 @@ class BehaviorGetClosestMob {
             mobFilter = (e) => e.mobType === this.mobs[0];
         }
         else {
-            mobFilter = (e) => { var _a; return ((_a = e.mobType) === null || _a === void 0 ? void 0 : _a.toUpperCase()) === 'ZOMBIE'; };
+            mobFilter = (e) => e.mobType?.toUpperCase() === 'ZOMBIE';
         }
         const mob = this.bot.nearestEntity(mobFilter);
         return mob;
     }
 }
-exports.BehaviorGetClosestMob = BehaviorGetClosestMob;
 /**
  * Gets a list of many default entity filters which can be applied to
  * default state behaviors.
  */
-function EntityFilters() {
+export function EntityFilters() {
     return {
         AllEntities: function () {
             return true;
@@ -79,4 +74,4 @@ function EntityFilters() {
         },
     };
 }
-exports.EntityFilters = EntityFilters;
+//# sourceMappingURL=BehaviorGetClosestMob.js.map

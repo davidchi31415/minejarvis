@@ -1,36 +1,23 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
 // MineJARVIS API
-const statemachine_1 = __importDefault(require("./statemachine"));
-const mappings_1 = __importDefault(require("./statemachine/mappings"));
+import createRootLayer from "./statemachine/index.js";
+import actionTokens from "./statemachine/mappings.js";
 // Mineflayer API
-const mineflayer_1 = __importDefault(require("mineflayer"));
-const mineflayer_pathfinder_1 = __importDefault(require("mineflayer-pathfinder"));
-const vec3_1 = require("vec3");
-const { pathfinder } = mineflayer_pathfinder_1.default;
-const mineflayer_pvp_1 = require("mineflayer-pvp");
-const mineflayer_statemachine_1 = require("mineflayer-statemachine");
+import mineflayer from "mineflayer";
+import pathfinder_plugin from "mineflayer-pathfinder";
+// @ts-ignore
+import Vec3 from "vec3";
+const { pathfinder } = pathfinder_plugin;
+import { plugin as pvp } from "mineflayer-pvp";
+import { BotStateMachine, StateMachineWebserver, } from "mineflayer-statemachine";
 // LangChain API
-const chat_models_1 = require("langchain/chat_models");
-const agents_1 = require("langchain/agents");
+import { ChatOpenAI } from "langchain/chat_models";
+import { ChatAgent, AgentExecutor } from "langchain/agents";
 // Brain API
-const tools_1 = require("./brain/tools");
-const MINECRAFT_IP = '10.254.214.217';
+import { MineTool } from "./brain/tools/index.js";
+const MINECRAFT_IP = "10.254.214.217";
 const MINECRAFT_PORT = 25565;
 const WEBVIEWER_PORT = 3005;
-const API_KEY = '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';
+const API_KEY = "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";
 // const configuration: Configuration = new Configuration({
 //   apiKey: API_KEY,
 // });
@@ -54,65 +41,63 @@ const API_KEY = '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';
 //     Note that it is important you always enclose the action token in brackets (but NOT the message after it).",
 //   },
 // ];
-function query(message) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // messages.push({
-        //   role: 'user',
-        //   content: message,
-        // });
-        // const completion = await openai.createChatCompletion({
-        //   model: 'gpt-3.5-turbo',
-        //   messages: messages,
-        // });
-        // messages.push(completion.data.choices[0].message);
-        // return messages[messages.length - 1].content;
-    });
+async function query(message) {
+    // messages.push({
+    //   role: 'user',
+    //   content: message,
+    // });
+    // const completion = await openai.createChatCompletion({
+    //   model: 'gpt-3.5-turbo',
+    //   messages: messages,
+    // });
+    // messages.push(completion.data.choices[0].message);
+    // return messages[messages.length - 1].content;
 }
-const bot = mineflayer_1.default.createBot({
+const bot = mineflayer.createBot({
     host: MINECRAFT_IP,
-    username: 'Jarvis',
+    username: "Jarvis",
     port: MINECRAFT_PORT,
 });
 bot.loadPlugin(pathfinder);
-bot.loadPlugin(mineflayer_pvp_1.plugin);
+bot.loadPlugin(pvp);
 function wait(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 const data = {
-    action: mappings_1.default.FOLLOW_PLAYER,
+    action: actionTokens.FOLLOW_PLAYER,
     params: {
         // Even things that are not being used must be initialized.
         followRadius: 5,
         fightRadius: 20,
-        blockName: 'emerald_ore',
-        mobName: 'Zombie',
-        mobType: 'Hostile mobs',
-        guardPos: new vec3_1.Vec3(0, 0, 0),
+        blockName: "emerald_ore",
+        mobName: "Zombie",
+        mobType: "Hostile mobs",
+        guardPos: new Vec3(0, 0, 0),
         quantity: 0,
     },
-    stack: [mappings_1.default.FOLLOW_PLAYER],
+    stack: [actionTokens.FOLLOW_PLAYER],
 };
-const tools = [new tools_1.MineTool(bot, data)]; //, new GuardTool(bot, data), new FightTool(bot, data), new FollowTool(bot, data), ]
-const agent = agents_1.ChatAgent.fromLLMAndTools(new chat_models_1.ChatOpenAI({
+const tools = [new MineTool(bot, data)]; //, new GuardTool(bot, data), new FightTool(bot, data), new FollowTool(bot, data), ]
+const agent = ChatAgent.fromLLMAndTools(new ChatOpenAI({
     openAIApiKey: API_KEY,
-    modelName: "gpt3.5-turbo"
+    modelName: "gpt3.5-turbo",
 }), tools);
-const executor = agents_1.AgentExecutor.fromAgentAndTools({ agent, tools });
-bot.once('spawn', () => __awaiter(void 0, void 0, void 0, function* () {
+const executor = AgentExecutor.fromAgentAndTools({ agent, tools });
+bot.once("spawn", async () => {
     // bot.pathfinder.dontCreateFlow = false; // Let the bot destroy blocks touching water to get to places.
-    const rootLayer = (0, statemachine_1.default)(bot, data);
-    const stateMachine = new mineflayer_statemachine_1.BotStateMachine(bot, rootLayer);
-    const webserver = new mineflayer_statemachine_1.StateMachineWebserver(bot, stateMachine, WEBVIEWER_PORT);
+    const rootLayer = createRootLayer(bot, data);
+    const stateMachine = new BotStateMachine(bot, rootLayer);
+    const webserver = new StateMachineWebserver(bot, stateMachine, WEBVIEWER_PORT);
     webserver.startServer();
-}));
-bot.on('chat', (username, message) => __awaiter(void 0, void 0, void 0, function* () {
+});
+bot.on("chat", async (username, message) => {
     // if (username !== bot.username) {
     //   const response = await query(message);
     //   console.log(response);
     //   bot.chat(response);
     // }
     if (username === bot.username) {
-        const responseG = yield executor.run(message);
+        const responseG = await executor.run(message);
         console.log(responseG);
         /*if (message.split(' ')[0] === '[MINE]') {
           console.log('Attempting to Switch to Mine.');
@@ -162,7 +147,8 @@ bot.on('chat', (username, message) => __awaiter(void 0, void 0, void 0, function
         }*/
         return;
     }
-}));
+});
 // Log errors and kick reasons:
-bot.on('kicked', console.log);
-bot.on('error', console.log);
+bot.on("kicked", console.log);
+bot.on("error", console.log);
+//# sourceMappingURL=index.js.map

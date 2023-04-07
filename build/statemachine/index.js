@@ -1,13 +1,8 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
 // MineJARVIS API
-const actions_1 = require("./actions");
-const mappings_1 = __importDefault(require("./mappings"));
+import { createFollowPlayerActionState, createFightActionState, createMineActionState, createGuardActionState, } from './actions/index.js';
+import actionTokens from './mappings.js';
 // Mineflayer API
-const mineflayer_statemachine_1 = require("mineflayer-statemachine");
+import { StateTransition, NestedStateMachine, BehaviorIdle, } from 'mineflayer-statemachine';
 function createRootLayer(bot, data) {
     /**
      * data is an object containing two attributes:
@@ -20,56 +15,57 @@ function createRootLayer(bot, data) {
      *          See the individual action machines to see what parameters should
      *          look like.
      */
-    const idleActionState = new mineflayer_statemachine_1.BehaviorIdle();
-    const followActionState = (0, actions_1.createFollowPlayerActionState)(bot, data);
-    const mineActionState = (0, actions_1.createMineActionState)(bot, data);
-    const fightActionState = (0, actions_1.createFightActionState)(bot, data);
-    const guardActionState = (0, actions_1.createGuardActionState)(bot, data);
+    const idleActionState = new BehaviorIdle();
+    const followActionState = createFollowPlayerActionState(bot, data);
+    const mineActionState = createMineActionState(bot, data);
+    const fightActionState = createFightActionState(bot, data);
+    const guardActionState = createGuardActionState(bot, data);
     const idleToActionTransitions = [
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: idleActionState,
             child: followActionState,
-            shouldTransition: () => data.action === mappings_1.default.FOLLOW_PLAYER,
+            shouldTransition: () => data.action === actionTokens.FOLLOW_PLAYER,
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: idleActionState,
             child: mineActionState,
-            shouldTransition: () => data.action === mappings_1.default.MINE,
+            shouldTransition: () => data.action === actionTokens.MINE,
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: idleActionState,
             child: fightActionState,
-            shouldTransition: () => data.action === mappings_1.default.FIGHT,
+            shouldTransition: () => data.action === actionTokens.FIGHT,
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: idleActionState,
             child: guardActionState,
-            shouldTransition: () => data.action === mappings_1.default.GUARD,
+            shouldTransition: () => data.action === actionTokens.GUARD,
         }),
     ];
     const actionToIdleTransitions = [
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: followActionState,
             child: idleActionState,
-            shouldTransition: () => data.action !== mappings_1.default.FOLLOW_PLAYER,
+            shouldTransition: () => data.action !== actionTokens.FOLLOW_PLAYER,
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: mineActionState,
             child: idleActionState,
-            shouldTransition: () => data.action !== mappings_1.default.MINE,
+            shouldTransition: () => data.action !== actionTokens.MINE,
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: fightActionState,
             child: idleActionState,
-            shouldTransition: () => data.action !== mappings_1.default.FIGHT,
+            shouldTransition: () => data.action !== actionTokens.FIGHT,
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: guardActionState,
             child: idleActionState,
-            shouldTransition: () => data.action !== mappings_1.default.GUARD,
+            shouldTransition: () => data.action !== actionTokens.GUARD,
         }),
     ];
     const transitions = [...idleToActionTransitions, ...actionToIdleTransitions];
-    return new mineflayer_statemachine_1.NestedStateMachine(transitions, idleActionState);
+    return new NestedStateMachine(transitions, idleActionState);
 }
-exports.default = createRootLayer;
+export default createRootLayer;
+//# sourceMappingURL=index.js.map

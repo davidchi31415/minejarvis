@@ -1,13 +1,11 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const base_1 = require("./base");
-class FollowTool extends base_1.BaseActionTool {
-    constructor() {
-        super(...arguments);
-        this.name = "FOLLOW";
-        this.description = "Call this when the bot needs to follow the player.";
-    }
-    _call(arg) {
-        return new Promise(() => { });
-    }
-}
+// import { Tool } from 'langchain/tools';
+// import { BaseActionTool } from './base';
+export {};
+// class FollowTool extends BaseActionTool {
+//     _call(arg: string): Promise<string> {
+//         return new Promise(() => {});
+//     }
+//     name: string = "FOLLOW";
+//     description: string = "Call this when the bot needs to follow the player.";
+// }
+//# sourceMappingURL=follow.js.map
