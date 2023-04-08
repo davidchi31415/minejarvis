@@ -1,13 +1,10 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.EntityFilters = exports.BehaviorGetClosestMob = void 0;
-const mineflayer_pvp_1 = require("mineflayer-pvp");
+import { plugin as pvpPlugin } from 'mineflayer-pvp';
 /**
  * Gets the closest entity to the bot and sets it as the entity
  * target. This behavior executes once right when the behavior
  * is entered, and should transition out immediately.
  */
-class BehaviorGetClosestMob {
+export class BehaviorGetClosestMob {
     constructor(bot, targets) {
         this.stateName = 'getClosestEntity';
         this.active = false;
@@ -15,7 +12,7 @@ class BehaviorGetClosestMob {
         this.mobType = "";
         this.bot = bot;
         this.targets = targets;
-        this.bot.loadPlugin(mineflayer_pvp_1.plugin);
+        this.bot.loadPlugin(pvpPlugin);
     }
     onStateEntered() {
         var _a;
@@ -50,12 +47,11 @@ class BehaviorGetClosestMob {
         return mob;
     }
 }
-exports.BehaviorGetClosestMob = BehaviorGetClosestMob;
 /**
  * Gets a list of many default entity filters which can be applied to
  * default state behaviors.
  */
-function EntityFilters() {
+export function EntityFilters() {
     return {
         AllEntities: function () {
             return true;
@@ -79,4 +75,3 @@ function EntityFilters() {
         },
     };
 }
-exports.EntityFilters = EntityFilters;

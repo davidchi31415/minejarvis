@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const base_1 = require("./base");
-class GuardTool extends base_1.BaseActionTool {
+import { BaseActionTool } from './base';
+class GuardTool extends BaseActionTool {
     constructor() {
         super(...arguments);
         this.name = "GUARD";

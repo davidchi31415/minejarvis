@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const base_1 = require("./base");
-class FightTool extends base_1.BaseActionTool {
+import { BaseActionTool } from './base';
+class FightTool extends BaseActionTool {
     constructor() {
         super(...arguments);
         this.name = "FIGHT";

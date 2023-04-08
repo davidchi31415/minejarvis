@@ -1,4 +1,3 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,12 +7,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createGuardActionState = void 0;
-const mineflayer_statemachine_1 = require("mineflayer-statemachine");
-const BehaviorGetClosestMob_1 = require("../behaviors/BehaviorGetClosestMob");
-const BehaviorFightMob_1 = require("../behaviors/BehaviorFightMob");
-const BehaviorReturnToGuard_1 = require("../behaviors/BehaviorReturnToGuard");
+import { StateTransition, NestedStateMachine, BehaviorIdle, } from 'mineflayer-statemachine';
+import { BehaviorGetClosestMob } from '../behaviors/BehaviorGetClosestMob.js';
+import { BehaviorFightMob } from '../behaviors/BehaviorFightMob.js';
+import { BehaviorReturnToGuard } from '../behaviors/BehaviorReturnToGuard.js';
 function wait(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -25,7 +22,7 @@ function leaveAction(data) {
         console.log('FINISHED');
     });
 }
-function createGuardActionState(bot, data) {
+export function createGuardActionState(bot, data) {
     /**
      *  data is passed in from the bot root layer.
      *
@@ -35,14 +32,14 @@ function createGuardActionState(bot, data) {
      */
     const targets = {};
     // Enter and Exit
-    const exit = new mineflayer_statemachine_1.BehaviorIdle();
+    const exit = new BehaviorIdle();
     // Fighting behavior states
-    const setGuardState = new mineflayer_statemachine_1.BehaviorIdle();
-    const returnState = new BehaviorReturnToGuard_1.BehaviorReturnToGuard(bot, targets);
-    const findNearestMobState = new BehaviorGetClosestMob_1.BehaviorGetClosestMob(bot, targets);
-    const fightMobState = new BehaviorFightMob_1.BehaviorFightMob(bot, targets);
+    const setGuardState = new BehaviorIdle();
+    const returnState = new BehaviorReturnToGuard(bot, targets);
+    const findNearestMobState = new BehaviorGetClosestMob(bot, targets);
+    const fightMobState = new BehaviorFightMob(bot, targets);
     const transitions = [
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: setGuardState,
             child: returnState,
             shouldTransition: () => {
@@ -52,7 +49,7 @@ function createGuardActionState(bot, data) {
                 return true;
             },
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: returnState,
             child: findNearestMobState,
             shouldTransition: () => {
@@ -63,7 +60,7 @@ function createGuardActionState(bot, data) {
                 return false;
             },
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: findNearestMobState,
             child: fightMobState,
             shouldTransition: () => {
@@ -74,7 +71,7 @@ function createGuardActionState(bot, data) {
                 return false;
             },
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             // If mob of certain type isn't found then return to guarding position
             parent: findNearestMobState,
             child: returnState,
@@ -84,7 +81,7 @@ function createGuardActionState(bot, data) {
                 return false;
             },
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: fightMobState,
             child: findNearestMobState,
             shouldTransition: () => {
@@ -96,7 +93,6 @@ function createGuardActionState(bot, data) {
             },
         }),
     ];
-    return new mineflayer_statemachine_1.NestedStateMachine(transitions, setGuardState, exit);
+    return new NestedStateMachine(transitions, setGuardState, exit);
 }
-exports.createGuardActionState = createGuardActionState;
-exports.default = createGuardActionState;
+export default createGuardActionState;

@@ -1,4 +1,3 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,11 +7,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.createFightActionState = void 0;
-const mineflayer_statemachine_1 = require("mineflayer-statemachine");
-const BehaviorGetClosestMob_1 = require("../behaviors/BehaviorGetClosestMob");
-const BehaviorFightMob_1 = require("../behaviors/BehaviorFightMob");
+import { StateTransition, NestedStateMachine, BehaviorIdle, } from 'mineflayer-statemachine';
+import { BehaviorGetClosestMob } from '../behaviors/BehaviorGetClosestMob.js';
+import { BehaviorFightMob } from '../behaviors/BehaviorFightMob.js';
 function wait(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -23,7 +20,7 @@ function leaveAction(data) {
         console.log(data.stack);
     });
 }
-function createFightActionState(bot, data) {
+export function createFightActionState(bot, data) {
     /**
      *  data is passed in from the bot root layer.
      *
@@ -32,13 +29,13 @@ function createFightActionState(bot, data) {
      */
     const targets = {};
     // Enter and Exit
-    const setMobState = new mineflayer_statemachine_1.BehaviorIdle();
-    const exit = new mineflayer_statemachine_1.BehaviorIdle();
+    const setMobState = new BehaviorIdle();
+    const exit = new BehaviorIdle();
     // Fighting behavior states
-    const findNearestMobState = new BehaviorGetClosestMob_1.BehaviorGetClosestMob(bot, targets);
-    const fightMobState = new BehaviorFightMob_1.BehaviorFightMob(bot, targets);
+    const findNearestMobState = new BehaviorGetClosestMob(bot, targets);
+    const fightMobState = new BehaviorFightMob(bot, targets);
     const transitions = [
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: setMobState,
             child: findNearestMobState,
             shouldTransition: () => {
@@ -48,7 +45,7 @@ function createFightActionState(bot, data) {
                 return true;
             },
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: findNearestMobState,
             child: fightMobState,
             shouldTransition: () => {
@@ -59,7 +56,7 @@ function createFightActionState(bot, data) {
                 return false;
             },
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             // If mob of certain type isn't found then leave
             parent: findNearestMobState,
             child: exit,
@@ -70,7 +67,7 @@ function createFightActionState(bot, data) {
                 return true;
             },
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: fightMobState,
             child: exit,
             shouldTransition: () => {
@@ -82,7 +79,7 @@ function createFightActionState(bot, data) {
                 return false;
             },
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: fightMobState,
             child: findNearestMobState,
             shouldTransition: () => {
@@ -95,7 +92,7 @@ function createFightActionState(bot, data) {
                 return false;
             },
         }),
-        new mineflayer_statemachine_1.StateTransition({
+        new StateTransition({
             parent: fightMobState,
             child: findNearestMobState,
             shouldTransition: () => {
@@ -107,6 +104,5 @@ function createFightActionState(bot, data) {
             },
         }),
     ];
-    return new mineflayer_statemachine_1.NestedStateMachine(transitions, setMobState, exit);
+    return new NestedStateMachine(transitions, setMobState, exit);
 }
-exports.createFightActionState = createFightActionState;
