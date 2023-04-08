@@ -1,5 +1,5 @@
-import { BaseActionTool } from "./base";
-import actionTokens from "../../statemachine/mappings";
+import { BaseActionTool } from "./base.js";
+import actionTokens from "../../statemachine/mappings.js";
 
 export class MineTool extends BaseActionTool {
     _call(arg: string): Promise<string> {

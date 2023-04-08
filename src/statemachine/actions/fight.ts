@@ -3,8 +3,8 @@ import {
   NestedStateMachine,
   BehaviorIdle,
 } from 'mineflayer-statemachine';
-import {BehaviorGetClosestMob} from '../behaviors/BehaviorGetClosestMob';
-import {BehaviorFightMob} from '../behaviors/BehaviorFightMob';
+import {BehaviorGetClosestMob} from '../behaviors/BehaviorGetClosestMob.js';
+import {BehaviorFightMob} from '../behaviors/BehaviorFightMob.js';
 import {Bot} from 'mineflayer';
 
 function wait(ms: number) {

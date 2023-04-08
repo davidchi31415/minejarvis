@@ -1,1 +1,1 @@
-export * from './StateData.interface';
+export * from './StateData.interface.js';

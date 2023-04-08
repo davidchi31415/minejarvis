@@ -1,6 +1,7 @@
 import {StateBehavior, StateMachineTargets} from 'mineflayer-statemachine';
 import {Bot} from 'mineflayer';
-import {pathfinder, Movements, goals} from 'mineflayer-pathfinder';
+import pkg from 'mineflayer-pathfinder';
+const {pathfinder, Movements, goals} = pkg;
 
 /**
  * This behavior will attempt to fight a mob. If the bot has

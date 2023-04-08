@@ -4,8 +4,8 @@ import {
   createFightActionState,
   createMineActionState,
   createGuardActionState,
-} from './actions';
-import actionTokens from './mappings';
+} from './actions/index.js';
+import actionTokens from './mappings.js';
 
 // Mineflayer API
 import {

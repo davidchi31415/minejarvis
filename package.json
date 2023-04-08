@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "compile": "tsc",
-    "prepare": "npm.c run compile",
+    "prepare": "npm run compile",
     "pretest": "npm run compile",
     "posttest": "npm run lint"
   },
@@ -33,5 +33,6 @@
     "@typescript-eslint/parser": "^5.57.0",
     "eslint": "^8.37.0",
     "typescript": "~4.7.0"
-  }
+  },
+  "type": "module"
 }

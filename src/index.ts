@@ -1,7 +1,7 @@
 // MineJARVIS API
-import createRootLayer from './statemachine';
-import actionTokens from './statemachine/mappings';
-import { StateData } from './interfaces';
+import createRootLayer from './statemachine/index.js';
+import actionTokens from './statemachine/mappings.js';
+import { StateData } from './interfaces/index.js';
 
 // Mineflayer API
 import mineflayer, { Bot } from 'mineflayer';
@@ -16,7 +16,7 @@ import { ChatOpenAI } from "langchain/chat_models";
 import { ChatAgent, AgentExecutor } from "langchain/agents";
 
 // Brain API
-import { MineTool } from './brain/tools';
+import { MineTool } from './brain/tools/index.js';
 
 const MINECRAFT_IP: string = '10.254.214.217';
 const MINECRAFT_PORT: number = 25565;
